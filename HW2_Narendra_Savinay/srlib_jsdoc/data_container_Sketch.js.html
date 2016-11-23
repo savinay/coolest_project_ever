@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: data/container/Sketch.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: data/container/Sketch.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>define([
+	"./Drawable",
+	"./Point",
+	"./Stroke",
+	"./Substroke",
+	"./Shape"
+	], function(Drawable, Point, Stroke, Substroke, Shape) {
+
+Sketch.prototype = new Drawable();
+Sketch.prototype.constructor = Sketch;
+
+/**
+ * Sketch object, a container for a canvas with point, stroke, substroke, and shape elements
+ *
+ * @class
+ * @memberOf container
+ * 
+ * @constructor
+ * @param {string|string[]} [domain] Domain or list of domains associated with the sketch (e.g. "Mechanix")
+ * @param {Object|Point[]} [points] Point cloud list or dictionary object with key as id
+ * @param {Object|Stroke[]} [strokes] Stroke cloud list or dictionary object with key as id
+ * @param {Object|Substroke[]} [substrokes] Substroke cloud list or dictionary object with key as id
+ * @param {Object|Shape[]} [shapes] Shape cloud list or dictionary object with key as id
+ * @param {number} [time] Javascript timestamp, ms
+ * @param {string} [id] GUID for the sketch
+ */
+function Sketch(domain, points, strokes, substrokes, shapes, time, id) {
+
+	// Call super
+	Drawable.call(this, time, id);
+
+
+	// Functions
+
+	/** @access public */
+
+	/**
+	 * Setter for domain
+	 * 
+	 * @param {string|string[]} newDomain New domain or list of domains associated with the sketch
+	 */
+	this.setDomain = function(newDomain) {
+		if (newDomain instanceof Array) {
+			this.domain = newDomain
+		}
+		else {
+			this.domain = [newDomain];
+		}
+	}
+
+	/**
+	 * Setter for points
+	 * 
+	 * @param {Object} newPoints New points cloud to associated with the sketch
+	 */
+	this.setPoints = function(newPoints){
+		this.points = newPoints;
+	}
+
+	/**
+	 * Setter for strokes
+	 * 
+	 * @param {Object} newStrokes New strokes cloud to associated with the sketch
+	 */
+	this.setStrokes = function(newStrokes){
+		this.strokes = newStrokes;
+	}
+
+	/**
+	 * Setter for substrokes
+	 * 
+	 * @param {Object} newSubstrokes New substrokes cloud to associated with the sketch
+	 */
+	this.setSubstrokes = function(newSubstrokes){
+		this.substrokes = newSubstrokes;
+	}
+
+	/**
+	 * Setter for shapes
+	 * 
+	 * @param {Object} newShapes New shapes cloud to associated with the sketch
+	 */
+	this.setShapes = function(newShapes){
+		this.shapes = newShapes;
+	}
+
+	/**
+	 * Getter for domain
+	 * 
+	 * @return {string[]} Gets the list of domains associated with the sketch
+	 */
+	this.getDomain = function() {
+		return this.domain;
+	}
+
+	/**
+	 * Getter for points
+	 * 
+	 * @return {Object} Point cloud object
+	 */
+	this.getPoints = function() {
+		return this.points;
+	}
+
+	/**
+	 * Getter for strokes
+	 * 
+	 * @return {Object} Stroke cloud object
+	 */
+	this.getStrokes = function() {
+		return this.strokes;
+	}
+
+	/**
+	 * Getter for substrokes
+	 * 
+	 * @return {Object} Substroke cloud object
+	 */
+	this.getSubstrokes = function() {
+		return this.substrokes;
+	}
+
+	/**
+	 * Getter for shapes
+	 * 
+	 * @return {Object} Shape cloud object
+	 */
+	this.getShapes = function() {
+		return this.shapes;
+	}
+
+	/**
+	 * Append a domain or list of domains to the domain list
+	 *
+	 * @param {string|string[]} newDomain New domain or list of domains associated with the sketch
+	 */
+	this.addDomain = function(newDomain) {
+		if (newDomain instanceof Array) {
+			this.domain = this.domain.concat(newDomain);
+		}
+		else {
+			this.domain.push(newDomain);
+		}
+	}
+
+	/**
+	 * Add point to points list
+	 * 
+	 * @param {Point} newPoint New point to add to the point cloud
+	 */
+	this.addPoint = function(newPoint){
+		this.points[newPoint.getId()] = newPoint;
+	}
+
+	/**
+	 * Add stroke to strokes list
+	 * 
+	 * @param {Stroke} newStrokes New stroke to add to the stroke cloud
+	 */
+	this.addStroke = function(newStroke){
+		this.strokes[newStroke.getId()] = newStroke;
+	}
+
+	/**
+	 * Add substroke to substrokes list
+	 * 
+	 * @param {Substroke} newSubstroke New substroke to add to the substroke cloud
+	 */
+	this.addSubstroke = function(newSubstroke){
+		this.substrokes[newSubstroke.getId()] = newSubstroke;
+	}
+
+	/**
+	 * Add shape to shapes list
+	 * 
+	 * @param {Shape} newShape New shape to add to the shape cloud
+	 */
+	this.addShape = function(newShape){
+		this.shapes[newShape.getId()] = newShape;
+	}
+
+
+	// Members
+
+	/** @access public */
+
+	if(!domain){
+		this.domain = [];
+	}
+	else{
+		if (domain instanceof Array) {
+			this.domain = domain;
+		}
+		else {
+			this.domain = [domain];
+		}
+	}
+
+	if(!points){
+		this.points = {}; 
+	}
+	else{
+		this.points = points;
+	}
+
+	if(!strokes){
+		this.strokes = {};
+	}
+	else{
+		this.strokes = strokes;
+	}
+
+	if(!substrokes){
+		this.substrokes = {};
+	}
+	else{
+		this.substrokes = substrokes;
+	}
+
+	if(!shapes){
+		this.shapes = {};
+	}
+	else{
+		this.shapes = shapes;
+	}
+
+};
+
+return Sketch;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="data.module_container.html">container</a></li><li><a href="data.module_io.html">io</a></li></ul><h3>Classes</h3><ul><li><a href="container.BoundingBox.html">BoundingBox</a></li><li><a href="container.Drawable.html">Drawable</a></li><li><a href="container.Point.html">Point</a></li><li><a href="container.Shape.html">Shape</a></li><li><a href="container.Sketch.html">Sketch</a></li><li><a href="container.Stroke.html">Stroke</a></li><li><a href="container.Substroke.html">Substroke</a></li><li><a href="io.Deserializer.html">Deserializer</a></li><li><a href="io.Serializer.html">Serializer</a></li></ul><h3>Namespaces</h3><ul><li><a href="core.html">core</a></li><li><a href="core.data.html">data</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sun Oct 02 2016 18:45:38 GMT-0500 (CDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

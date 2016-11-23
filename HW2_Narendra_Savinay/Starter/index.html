@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Homework 2 Starter</title>
+    <!-- An AMD-loader like RequireJS is necessary for srlib's asynchronous modules -->
+    <script src="require.js"></script>
+    <!-- Load srlib following RequireJS -->
+    <script src="srlib.js"></script>
+    <!-- JQuery provides a very nice set of tools when dealing with AJAX requests -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    // Begin processing once webpage loaded
+    $(document).ready(function() {
+        // Globals
+        sketches = {};
+        deserializer = new srlib.core.data.io.Deserializer();
+        serializer = new srlib.core.data.io.Serializer();
+
+        Point = srlib.core.data.container.Point;
+
+        Total = 0;
+        AllNoth = 0;
+        TP = 0;
+        FP = 0;
+        TN = 0;
+        FN = 0;
+
+        drawStrokes = true;
+
+        startSketch = 4000; // Rather than start with the oldest, will look at some of the more recent sketches for now
+        maxSketches = startSketch + 200; // To begin with, simply consider 200 sketches for segmentation; can change this value anytime for more testing
+
+        getSketches();
+
+    });
+
+    Array.prototype.insert = function (index, item) {
+        this.splice(index, 0, item);
+    };
+
+    function updateDrawStrokes() {
+        drawStrokes = true;
+        $('#drawStrokes').prop('checked',true);
+        $('#drawSubstrokes').prop('checked',false);
+        updateCanvas();
+    }
+
+    function updateDrawSubstrokes() {
+        drawStrokes = false;
+        $('#drawStrokes').prop('checked',false);
+        $('#drawSubstrokes').prop('checked',true);
+        updateCanvas();
+    }
+
+    function getS(s) {
+        if (!drawStrokes) {
+            return s.getSubstrokes();
+        }
+        else {
+            return s.getStrokes();
+        }
+    }
+
+    // Draw data on update of sketch selection
+    function updateCanvas() {
+        var c = document.getElementById("sketch");
+        var ctx = c.getContext("2d");
+
+        // Clear canvas first
+        ctx.clearRect(0,0,c.width,c.height);
+
+        var current = sketches[$('#sketches').val()]; // Select the sketch selected from global dictionary
+        for (var key in getS(current)) {
+            // Draw new shape
+
+            var stroke = getS(current)[key]; // Select the drawing area
+            var points = stroke.getPoints();
+
+            ctx.beginPath();
+            ctx.lineWidth = "5";
+            ctx.strokeStyle = "#"+((1<<24)*Math.random()|0).toString(16); // Randomize stroke colors for easy visualization
+            // console.log(points);
+            for (var i = 0; i < points.length; i++) { // Set path to point values
+                if (i == 0) {
+                    try {
+                        ctx.moveTo(points[i].getX(),points[i].getY());
+                    } catch(err) {
+                        ctx.moveTo(points[i].x,points[i].y);
+                    }
+                    
+                }
+                else {
+                    // console.log(points[i]);
+                    try {
+                        ctx.lineTo(points[i].getX(),points[i].getY());
+                    } catch(err) {
+                        ctx.lineTo(points[i].x,points[i].y);
+                    }
+                    
+                }
+            }
+
+            ctx.stroke();  // Draw it
+        }
+    }
+
+    function getMetrics(original, current) {
+        var origSubstrokes = {};
+        var currSubstrokes = {};
+        var failures = false;
+
+        // Sort substrokes from original and current into lists grouped by parent stroke
+        for (var key in original.getSubstrokes()) {
+            try {
+                if (original.getSubstrokes()[key].getPoints().length > 1) {
+                    if (original.getSubstrokes()[key].getParent().getId() in origSubstrokes) {
+                        origSubstrokes[original.getSubstrokes()[key].getParent().getId()].push(original.getSubstrokes()[key]);
+                    } else {
+                        origSubstrokes[original.getSubstrokes()[key].getParent().getId()] = [original.getSubstrokes()[key]];
+                    }
+                }
+            } catch (err) {
+                // Some sketches have an error with where not all substrokes have a parent, ignore these since they won't appear in the current list either
+            }
+        }
+
+        for (var key in current.getSubstrokes()) {
+            try {
+                if (current.getSubstrokes()[key].getParent().getId() in currSubstrokes) {
+                    currSubstrokes[current.getSubstrokes()[key].getParent().getId()].push(current.getSubstrokes()[key]);
+                } else {
+                    currSubstrokes[current.getSubstrokes()[key].getParent().getId()] = [current.getSubstrokes()[key]];
+                }
+            } catch (err) {
+                // Some sketches may be missing a parent, ignore in this case
+            }
+        }
+
+        // Attempt to match substrokes from the same parent
+        // If only 1 substroke from parent -- no segmentation;
+        // All matches are True Negatives
+        // All extras in current are False Positives
+        // If more than 1 substroke from parent -- segmentation; 
+        // All matches are True Positives
+        // All extras in current are False Positives
+        // All extras in original are False Negatives
+        for (var key in origSubstrokes) { // Due to a small bug, there's a few sketches where the stroke didn't get added, so it is missing in current; this makes original a superset at worse when they don't match, so just go through current's strokes
+            var origList = origSubstrokes[key];
+            var currList = currSubstrokes[key];
+
+            // Get a threshold for corner distance customized for the stroke size
+            var BB = new srlib.core.data.container.BoundingBox(origList[0].getParent());
+            var threshold = Math.sqrt(Math.pow(BB.getMaxX() - BB.getMinX(), 2) + Math.pow(BB.getMaxY() - BB.getMinY(), 2)) / 40.0;
+
+            if (origList.length == 1) { // No segmentation
+                if (currList.length == 1) {
+                    TN = TN + 1; // Correctly determine no segmentation
+                } else {
+                    FP = FP + (currList.length - 1) / 2; // All extra strokes are FP
+                    failures = true;
+                }
+            } else { // Segmentation
+                // Try to find matches
+                var distances = [];
+
+                for (var j = 0; j < origList.length; j++) {
+                    distances[j] = [];
+                    for (var k = 0; k < currList.length; k++) {
+                        // distance[j][k] = distance between start and end points summed
+                        // console.log(origList[j].getPoints()[0]);
+                        distances[j][k] = origList[j].getPoints()[0].distance(currList[k].getPoints()[0]) + origList[j].getPoints()[origList[j].getPoints().length - 1].distance(currList[k].getPoints()[currList[k].getPoints().length - 1]);
+                        // console.log(distances[j][k]);
+                    }
+                }
+                // Use distance matrix to compute metrics
+                for (var j = 0; j < distances.length; j++) {
+                    var k = distances[j].indexOf(Math.min.apply(Math, distances[j]));
+                    if (distances[j][k] < threshold * 10) {
+                        TP = TP + 1; // A match that was cumulatively within 3 pixels of both start and end points
+                    } else {
+                        FN = FN + 0.5; // Else, no close match; we assume a miss, which is false negative
+                        failures = true;
+                    }
+                }
+                if (currList.length > origList.length) {
+                    FP = FP + (currList.length - origList.length) / 2; // Any extra in currList are FPs
+                    failures = true;
+                }
+            }
+        }
+
+        Total = Total + 1;
+        if (!failures) {
+            AllNoth = AllNoth + 1;
+        }
+    }
+
+    // function distance(points, a, b) {
+    //     dx = points[b].x - points[a].x;
+    //     dy = points[b].y - points[a].y;
+    //     console.log("distance: ", Math.sqrt(dx*dx + dy*dy));
+    //     return Math.sqrt(dx*dx + dy*dy);
+    // }
+
+
+    function calculateInterSpacingDistance(obj) {
+        // body...
+        minX = Number.MAX_VALUE;
+        maxX = Number.MIN_VALUE;
+        minY = Number.MAX_VALUE;
+        maxY = Number.MIN_VALUE;
+        // console.log(obj)
+
+        // console.log(obj.points);
+        for (var key_point in obj.points) {
+            // console.log(obj.points);
+            x = obj.points[key_point].x;
+            y = obj.points[key_point].y;
+            if (x < minX) {
+                minX = x;
+            }
+
+            if (x > maxX) {
+                maxX = x;
+            }
+
+            if (y < minY) {
+                minY = y;
+            }
+
+            if (y > maxY) {
+                maxY = y;
+            }
+        }
+
+        var interSpacingDistance = Math.sqrt(Math.pow((maxX-minX),2) + Math.pow((maxY-minY),2))/40;
+        return interSpacingDistance; 
+    }
+
+    function resampleStrokePoints(obj, interSpacingDistance) {
+        // body...
+        // console.log("interSpacingDistance: ", interSpacingDistance);
+        var d_resample = 0;
+        var resampled = [];
+        resampled = [{x: obj.points["0"].x, y: obj.points["0"].y}];
+
+        for (var i = 1; i < obj.points.length; i++) {
+            try {
+                var d = Math.sqrt(Math.pow((obj.points[i].x-obj.points[i-1].x),2) + Math.pow((obj.points[i].y-obj.points[i-1].y),2));
+                if (d_resample + d >= interSpacingDistance) {
+                    var qx = obj.points[i-1].x + ((interSpacingDistance - d_resample)/d)*(obj.points[i].x-obj.points[i-1].x);
+                    var qy = obj.points[i-1].y + ((interSpacingDistance - d_resample)/d)*(obj.points[i].y-obj.points[i-1].y);
+                    resampled.push({x:qx, y:qy});
+                    obj.points.insert(i, new Point(qx,qy));
+                    d_resample = 0;
+
+                } else {
+                    d_resample = d_resample + d;
+                }
+            } catch(err) {
+                continue;
+            }
+                
+                
+        }
+        return resampled;
+    }
+
+    function median(values) {
+
+        values.sort( function(a,b) {return a - b;} );
+
+        var half = Math.floor(values.length/2);
+
+        if(values.length % 2)
+            return values[half];
+        else
+            return (values[half-1] + values[half]) / 2.0;
+    }
+
+    function getCorners(resampled) {
+        var corners = [];
+        corners.push(0);
+        var w = 3;
+        var straws = [];
+        for (var i = w; i < resampled.length - w; i++) {
+            try {
+                straws[i] = Math.sqrt(Math.pow((resampled[i-w].x - resampled[i+w].x),2) + Math.pow((resampled[i-w].y - resampled[i+w].y),2));
+
+            } catch(err) {
+                continue;
+            }
+            
+        }
+
+
+        medianValue = median(JSON.parse(JSON.stringify(straws)));
+        var t = 0.95 * medianValue;
+        
+
+        var startBelow = true;
+        var index = w;
+        for(var  i = w; i < resampled.length - w; i++) {
+            if (straws[i] < t && startBelow) {
+                startBelow = true;
+                index = i;
+            } else {
+                startBelow = false;
+                break;
+            }
+        }
+        for(var i = index; i < resampled.length - w; i++) {
+            if (straws[i] < t) {
+                var localMin = Number.MAX_VALUE;
+                var localMinIndex = i;
+                while ( (i < straws.length) && (straws[i] < t)) {
+                    if (straws[i] < localMin) {
+                        localMin = straws[i];
+                        localMinIndex = i;
+                    }
+                    i = i + 1;
+                }
+                
+                corners.push(localMinIndex);
+            }
+        }
+
+        corners.push(resampled.length - 1);
+        corners = postProcessCorners(resampled, corners, straws);
+        return corners;
+
+
+    }
+
+    function postProcessCorners(points, corners, straws) {
+        var resume = false
+        while(!resume) {
+            resume = true;
+            // console.log("here");
+            for(var i=1; i < corners.length; i++) {
+                var c1 = corners[i - 1];
+                var c2 = corners[i];
+                // console.log("reached");
+                if(!isLine(points, c1, c2)) {
+                    var newCorner = halfwayCorners(straws, c1, c2);
+                    if (newCorner > c1 && newCorner < c2) {
+                        corners.insert(i, newCorner);
+                        resume = false;
+                    }
+                }
+            }
+        }
+
+        
+
+        for(var i = 1; i < corners.length - 1; i++) {
+            c1 = corners[i - 1];
+            c2 = corners[i + 1];
+            if (isLine(points, c1, c2)) {
+                corners.splice(i, 1);
+                i = i - 1;
+            }
+        }
+        return corners;
+        
+    }
+
+    function halfwayCorners(straws, a, b) {
+        var quarter = (b-a)/4;
+        var minValue = Number.MAX_VALUE;
+        var minIndex = 0;
+        for(var i = a+quarter; i < b-quarter; i++){
+            if (straws[i] < minValue) {
+                minValue = straws[i];
+                minIndex = i;
+            }
+        }
+        return minIndex;
+    }
+
+
+    function isLine(points, a, b) {
+        var threshold = 0.95;
+        var distance = Math.sqrt(Math.pow((points[a].x - points[b].x),2) + Math.pow((points[a].y - points[b].y),2));
+        var pathDist = pathDistance(points, a, b);
+        if (distance/pathDist > threshold) {
+            return true;
+        } else {
+            return false;
+        }
+        return false;
+        
+    }
+
+
+    function pathDistance(points, a, b) {
+        d = 0;
+        for (var i = a; i < b; i++) {
+            try {
+                d = d + Math.sqrt(Math.pow((points[i].x - points[i+1].x),2) + Math.pow((points[i].y - points[i+1].y),2));
+            } catch(err) {
+                continue;
+            }
+            
+        }
+        return d;
+    }
+
+    // Load data, populating global dictionary of sketch objects and selection list for viewing ease
+    function getSketches() {
+        // For this assignment, sketches will live on srl_db
+        // See http://srl-prod1.cs.tamu.edu:7750/doc/ for more info about using the API
+        console.log(startSketch, maxSketches);
+        while (startSketch < maxSketches) {
+            $.ajax({url: "http://srl-prod1.cs.tamu.edu:7750/getSketches?domain=MechanixCleaned&interpretation=force&skip=" + String(startSketch), success: function(result) {
+                console.log(result.length);
+                for (var i = 0; i < result.length; i++) {
+                    json = result[i]; // Get original sketch
+                    // console.log(json);
+                    var original = deserializer.fromSketchMLJSON(JSON.stringify(json)); // Put in srlib object for processing
+
+                    json = serializer.toSketchMLJSONbasic(original); // While the original remains for reference, we'll strip out the substrokes and other elements so you can add your own substrokes for comparison
+                    var current = deserializer.fromSketchMLJSONbasic(json);
+                    // console.log(current.getStrokes());
+                    // Create substrokes here!
+                    
+
+                    // resampling
+
+
+                    for (var key in current.getStrokes()) {
+
+                        //calculate interspacing distance
+                        
+                        var interSpacingDistance = calculateInterSpacingDistance(current.getStrokes()[key]);
+
+                        // resample points
+
+                        var resampled = resampleStrokePoints(current.getStrokes()[key], interSpacingDistance);
+
+                        // get-corners
+
+                        var corners = getCorners(resampled);
+
+
+                        /*
+                         *
+                         *
+                         * Do something to detect corners or breaks for substrokes!
+                         * 
+                         *
+                         * 
+                         */
+
+                         
+
+
+
+                         
+
+                        // Example below is worst case of creating substroke equal to the stroke
+                        // It serves to show the functions you may need
+
+                        // Get points of a stroke
+                        var points = current.getStrokes()[key].getPoints();
+                        // console.log(points);
+
+                        // Substrokes will also have a list of points, derived from parent stroke
+                        var newPoints = [];
+
+                        // Iterating through points, perhaps for feature detection or some other purpose
+
+                        for(var k = 1; k < corners.length; k++) {
+                            for(var j = corners[k-1]; j<corners[k]; j++) {
+                                newPoints.push(new Point(resampled[j].x, resampled[j].y));
+                            }
+                            var substroke = new srlib.core.data.container.Substroke(current.getStrokes()[key],newPoints);
+                            newPoints = [];
+                            // Add substroke to sketch for drawing
+                            current.addSubstroke(substroke);
+                        }
+                        
+                        // // Add substroke to sketch for drawing
+
+                        // NOTE: There are a number of functions in srlib, and many different ways to accomplish these tasks of creating and managing substrokes. A simple method is shown here, but ask and explore about other methods if desired.
+                    }
+
+                    // Save both sketches for visual comparison
+                    sketches["old-" + original.getId()] = original;
+                    $('#sketches').append($('<option/>', { 
+                        value: "old-" + original.getId(), // Save sketch id as value for easy access from global dictionary
+                        text : "old-" + original.getId() // Show id as value
+                    }));
+
+                    sketches["new-" + current.getId()] = current;
+                    $('#sketches').append($('<option/>', { 
+                        value: "new-" + current.getId(), // Save sketch id as value for easy access from global dictionary
+                        text : "new-" + current.getId() // Show id as value
+                    }));
+                    getMetrics(original,current);
+                    
+                }
+
+                console.log("TP: ", TP, "TN: ", TN, "FP: ", FP, "FN: ", FN);
+                console.log("accuracy: ", (TP+TN)/(TP+TN+FP+FN));
+                
+                
+                // console.log(TP)
+            }});
+        startSketch = startSketch + 50; // getSketches gets 50 sketches at a time always, break into requests with a skip/start counter
+        }
+        // console.log("done");
+    }
+    </script>
+</head>
+<!-- The body consists simply of a canvas for drawing and a selection list; this display is for the user's benefit, not required -->
+<body>
+
+<canvas id="sketch" width="2048" height="1024" style="position:fixed;top:0px;left:0px;border:1px solid #d3d3d3">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<select id="sketches" size="2" style="position:fixed;top:0px;left:0px;width:20%;height:100%;" onchange="updateCanvas()"></select>
+
+<div style="position:fixed;top:0px;right:0px">
+Draw 
+<input id="drawStrokes" type="radio" value="strokes" onclick="updateDrawStrokes()"  checked="true"> Strokes
+<input id="drawSubstrokes" type="radio" value="substrokes" onclick="updateDrawSubstrokes()"> Substrokes<br>
+</div>
+
+</body>
+</html>

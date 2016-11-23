@@ -1,20 +1,174 @@
 <html>
 	<head>
 		<title>PaperJS - Starter Canvas</title>
+		<script src="https://code.jquery.com/jquery-3.1.1.js"
+		  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+		  crossorigin="anonymous"></script>
 		<!-- An AMD-loader like RequireJS is necessary for srlib's asynchronous modules -->
 		<script src="js/require.js"></script>
 		<!-- Load srlib following RequireJS -->
 		<script src="js/srlib.js"></script>	
 		<!--Paper JS-->
 		<script src="js/paper-full.js"></script>
+		<!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">  -->
+		<!--<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
+		<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>-->
+		<script src="./recognizer.js"></script>
+		<script src="./codeGeneration.js"></script>
 		<!--Fonts and styling-->
 		<link href="css/style.css" rel='stylesheet' type='text/css'/>
-   
+		<!--BOOTSTRAP-->
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
-	<body>	
+	<style type="text/css">
+		textarea {
+			background-color: #c4fff9;
+			border-radius: 8px;
+			border-color: #c4fff9;
+			text-align: center;
+		}
+		img {
+		   padding:1px;
+		   border:1px solid #021a40;
+		   opacity: .25;
+		}
+		/*.col-md-12{*/
+		/*   margin-left:auto;*/
+		/*   margin-right:auto;*/
+		/*   display:block;*/
+		/*}*/
+	</style>
+
+	<body>
+	<button type="button" id="drawTypeButton">Pictures!</button>
+	<button type="button" id="gridOnButton">Turn Grid ON</button>
+	<!--<div class=container>-->
+	<!--	<div class="row">-->
+	<!--		<div class="col-md-12"></div>-->
+	<!--	</div>-->
+	<!--</div>-->
+	<p id="log"></p>
+	<div class = "sketchProject"></div>
+	
+	<div id="chart"></div>
 	<script type="text/paperscript" canvas="canvas">
-			
-					
+	$("#drawTypeButton").click(function(){
+		$(this).toggleClass("picture");
+		if ($(this).hasClass("picture"))
+			$(this).text("Text Areas!");
+		else
+			$(this).text("Pictures!");
+	});
+	// $("#gridOnButton").click(function(){
+	// 	$(this).toggleClass("gridOn");
+	// 	if ($(this).hasClass("gridOn"))
+	// 		$(this).text("Turn Grid OFF");
+	// 	else
+	// 		$(this).text("Turn Grid ON");
+	// });
+	
+
+	function distance(x1, x2, y1, y2) {
+	    return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+	}
+	
+	function codeGenerationTextArea(coordinates) {
+	    var max_x = coordinates.max_x;
+	    var max_y = coordinates.max_y;
+	    var min_x = coordinates.min_x;
+	    var min_y = coordinates.min_y;
+	    var width = max_x - min_x;
+	    var height = max_y - min_y;
+	    return [width, height];
+	}
+	
+	var add_jquery = function(){
+		$("img").mouseover(function(){
+			$(this).fadeTo(500, 1);
+		});
+		$("img").mouseleave(function(){
+			$(this).fadeTo(500, .25);
+		});
+		$("img").click(function(){
+			var path = prompt("Insert picture url.");
+			$(this).css("content", "url("+ path +")");
+			// $(this).css("opacity", 1);
+			// $(this).attr("id", "insertedImg");
+		});
+		$("#draggable").mousedown(function(event){
+			$this = $(this);
+			$this.css("box-shadow", "10px 10px grey");
+			var init_X = event.pageX; // mouse init X
+			var init_Y	= event.pageY; // mouse init Y
+			var elem = $this.offset(); // element init position
+			$(document).mousemove(function(event){
+				var xmove = elem.left + (event.pageX - init_X);
+				var ymove = elem.top + (event.pageY - init_Y);
+				$this.css('top',ymove+"px");
+				$this.css('left',xmove+"px");
+				$(document).mouseup(function(){
+					$this.css("box-shadow", "");
+				});
+			});
+		});
+	}
+	
+	var isBox = function(sketch){
+		var r =  getRange(sketch);
+		if (r["maxx"]-r["minx"] < 60) return false;
+		if (r["maxy"]-r["miny"] < 60) return false;
+		var i = stroke.getNumPoints();
+		var xstart = stroke.getPointAt(0).getX();
+		var xend = stroke.getPointAt(i-1).getX();
+		var ystart = stroke.getPointAt(0).getY();
+		var yend = stroke.getPointAt(i-1).getY();
+		console.log(distance(xstart, xend, ystart, yend));
+		return (distance(xstart, xend, ystart, yend) < 20);
+	}
+	
+	var addHereTextArea = function(w, h, left, top){
+		// if ($("#gridOnButton").hasClass("gridOn")){
+			// var position=' style="width:' + w + 'px; height:' + h + 'px;" ';
+			// $insertion=$('.col-md-12');
+		// }
+		// else{
+			var position = ' style=" position:absolute; left:' + left
+			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+			$insertion=$('.sketchProject');
+		// }
+		var id = " id=drawnObject ";
+		$insertion.after("<textarea id='draggable' placeholder='You can add text here!'"
+								+ id + position + "></textarea>");
+	}
+
+	var addHereImage = function(w, h, left, top){
+		var position = ' style=" position:absolute; left:' + left
+			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		var id = " id=drawnObject ";
+		$('.sketchProject').after("<img id='draggable' src=https://getuikit.com/docs/images/placeholder_600x400.svg "
+								+ id + position + "></img>");
+	}
+	
+	var getRange = function(stroke){
+		var minx = 100000000; var maxx = -100000000;
+		var miny = 100000000; var maxy = -100000000;
+		for (i=0; i<stroke.getNumPoints(); i++){
+			var p = stroke.getPointAt(i);
+			minx = Math.min(p.getX(), minx);
+			miny = Math.min(p.getY(), miny);
+			maxx = Math.max(p.getX(), maxx);
+			maxy = Math.max(p.getY(), maxy);
+		}
+		return {"minx":minx, "maxx":maxx, "miny":miny, "maxy":maxy};
+	}
+
+	var startPoint_x;
+	var startPoint_y;
 	function onMouseDown(event) {
 		// PaperJS add a new Path object and initial starting point
 		path = new Path();
@@ -22,9 +176,13 @@
 		path.strokeWidth = 2;
 		path.add(event.point);
 		
+		
 		// SRLlib add a new Stroke object and initial starting point
 		stroke = new srlib.core.data.container.Stroke();
 		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
+		console.log(point);
+		startPoint_x = point.x;
+		startPoint_y = point.y;
 		if (typeof sketch == "undefined") {
 			sketch = new srlib.core.data.container.Sketch();
 		}
@@ -36,22 +194,51 @@
 	function onMouseDrag(event) {
 	// PaperJS add points to Path object on mouse drag
 	path.add(event.point);
-
-	// SRLlib add points to Stroke on mouse drag
 	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
 	sketch.addPoint(point);
 	stroke.addPoint(point);
+	
 	}
 
-	function onMouseUp(event) {	
-	
-	// Add evaluation / recognition functions or whatever you want here!
-	
+	function onMouseUp(event) {
+		// VERY basic way of identifying box
+		// based on if ends connect and bigger than certain size
+		if (isBox(stroke)){
+			var ranges = getRange(stroke);
+			console.log(ranges);
+			var coordinates = {max_x: ranges["maxx"], min_x: ranges["minx"],
+							   max_y: ranges["maxy"], min_y: ranges["miny"]};
+			var width = codeGenerationTextArea(coordinates)[0];
+			var height = codeGenerationTextArea(coordinates)[1];
+			if ($('button').hasClass('picture'))
+				addHereTextArea(width, height, startPoint_x, startPoint_y);
+			else
+				addHereImage(width, height, startPoint_x, startPoint_y);
+		}
+		path.removeSegments();
+	add_jquery();
 	}
 	
+
 	</script>	
 	
 	<canvas id="canvas" rezise="true"></canvas>
 	
    </body>
  </html>
+
+<script>
+	 // jquery archives
+ 	// $("img").mouseover(function() {
+	//   $(this).animate(
+	//   	{opacity: 1},
+	//   	500);
+	// });
+
+	// $("img").mouseover(function(){
+	// 	$(this).css("box-shadow", "5px 5px grey");
+	// });
+	// $("img").mouseleave(function () {
+	// 	$(this).css("box-shadow", "");
+	// });
+</script>
