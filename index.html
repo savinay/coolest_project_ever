@@ -43,28 +43,47 @@
 	</div>
 	<script type="text/paperscript" canvas="canvas">
 	// add a button for switching between drawing text and images
-	$("#drawTypeButton").click(function(){
-		$(this).toggleClass("picture");
-		if ($(this).hasClass("picture"))
-			$(this).text("Text Areas!");
+   	function toggleRecognizer() {
+		var recognizer = $("#recognitionOnButton");
+		recognizer.toggleClass("on");
+		if (recognizer.hasClass("on"))
+			recognizer.text("Turn Recognizer OFF");
 		else
-			$(this).text("Pictures!");
+			recognizer.text("Turn Recognizer ON");
+	}
+
+	function toggleRectangleType(){
+		var rectangleType = $("#drawTypeButton");
+		rectangleType.toggleClass("picture");
+		if (rectangleType.hasClass("picture"))
+			rectangleType.text("Text Areas!");
+		else
+			rectangleType.text("Pictures!");
+	}
+	
+	$("#drawTypeButton").click(function(){
+		toggleRectangleType();
 	});
 	
 	$("#recognitionOnButton").click(function(){
-		$(this).toggleClass("on");
-		if ($(this).hasClass("on"))
-			$(this).text("Turn Recognizer OFF");
-		else
-			$(this).text("Turn Recognizer ON");
+		toggleRecognizer()
+	});
+	
+
+	$(document).on("keypress", function (e) {
+		// console.log(e.which);
+    	if (e.which == 32) //space bar pressed
+    		toggleRecognizer();
+    	if (e.which == 114) // r pressed
+    		toggleRectangleType();
 	});
 	// Global variables for detecting start and end points of a line
 	// really bad right?? oops
 	var startPoint;
 	var EndPoint;
-	// more globalllls
-	var downtime;
-	var uptime;
+	// more globals
+	var starttime;
+	var endtime;
 	
 	// ...... GEOMETRIC FUNCTIONS .......
 	function distance(x1, x2, y1, y2) {
@@ -184,7 +203,7 @@
 	// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
 	function onMouseDown(event) {
 		// PaperJS add a new Path object and initial starting point
-		downtime = new Date().getTime();
+		endtime = new Date().getTime();
 		path = new Path();
 		path.strokeColor = 'blue';
 		path.strokeWidth = 2;
@@ -196,7 +215,8 @@
 		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
 		startPoint_x = point.x;
 		startPoint_y = point.y;
-		if (typeof sketch == "undefined") {
+		console.log(Math.abs(endtime-starttime));
+		if (Math.abs(endtime-starttime) > 2000 || typeof sketch == "undefined"){
 			sketch = new srlib.core.data.container.Sketch();
 		}
 		sketch.addStroke(stroke);
@@ -215,25 +235,28 @@
 	function onMouseUp(event) {
 		// recognize(stroke.getPoints());
 		// if (isBox(stroke)){
-		uptime = new Date().getTime();
-		// if (uptime-downtime < 2000){
-		console.log(sketch);
-		// }
-		if ($('#recognitionOnButton').hasClass('on')){
-			path.removeSegments();
-			endPoint = event.point;
-			var shape = recognize(stroke.getPoints());
-			if (shape == "line") addLine();
-			if (shape == "rectangle"){
-				var coordinates = getExtremes(stroke);
-				var width = codeGenerationTextArea(coordinates)[0];
-				var height = codeGenerationTextArea(coordinates)[1];
-				if ($('#drawTypeButton').hasClass('picture'))
-					addTextArea(width, height, startPoint_x, startPoint_y);
-				else
-					addImage(width, height, startPoint_x, startPoint_y);
+		starttime = new Date().getTime();
+		var combined_stroke = [];
+		var all_strokes = sketch.getStrokes();
+		for (var key in all_strokes)
+			combined_stroke = combined_stroke.concat(all_strokes[key].getPoints());
+		if (Math.abs(endtime-starttime) > 2000){
+			if ($('#recognitionOnButton').hasClass('on')){
+				path.removeSegments();
+				endPoint = event.point;
+				var shape = recognize(combined_stroke); //stroke.getPoints() 
+				if (shape == "line") addLine();
+				if (shape == "rectangle"){
+					var coordinates = getExtremes(stroke);
+					var width = codeGenerationTextArea(coordinates)[0];
+					var height = codeGenerationTextArea(coordinates)[1];
+					if ($('#drawTypeButton').hasClass('picture'))
+						addTextArea(width, height, startPoint_x, startPoint_y);
+					else
+						addImage(width, height, startPoint_x, startPoint_y);
+				}
+				add_jquery();
 			}
-			add_jquery();
 		}
 	}
 /*
