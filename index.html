@@ -1,62 +1,48 @@
 <html>
 	<head>
 		<title>PaperJS - Starter Canvas</title>
-		<script src="https://code.jquery.com/jquery-3.1.1.js"
-		  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
-		  crossorigin="anonymous"></script>
+		<!--For using jquery!-->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		  <!--integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="-->
+		  <!--crossorigin="anonymous"></script>-->
 		<!-- An AMD-loader like RequireJS is necessary for srlib's asynchronous modules -->
 		<script src="js/require.js"></script>
 		<!-- Load srlib following RequireJS -->
 		<script src="js/srlib.js"></script>	
 		<!--Paper JS-->
 		<script src="js/paper-full.js"></script>
-		<!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">  -->
-		<!--<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
-		<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>-->
-		<script src="./recognizer.js"></script>
-		<script src="./codeGeneration.js"></script>
-		<!--Fonts and styling-->
+		<!--cool font-->
+		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+		<!--Fonts and styling -- needed?-->
 		<link href="css/style.css" rel='stylesheet' type='text/css'/>
-		<!--BOOTSTRAP-->
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<!-- jQuery library -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-		<!-- Latest compiled JavaScript -->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<!--this is the styling for the elements added to the screen-->
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script type="text/javascript" src="jq.js"></script>
+		<script type="text/javascript" src="geometry.js"></script>
+		<!--this is the reconizer of shapes-->
+		<script type="text/javascript" src="recognizer.js"></script>
 	</head>
-	<style type="text/css">
-		textarea {
-			background-color: #c4fff9;
-			border-radius: 8px;
-			border-color: #c4fff9;
-			text-align: center;
-		}
-		img {
-		   padding:1px;
-		   border:1px solid #021a40;
-		   opacity: .25;
-		}
-		/*.col-md-12{*/
-		/*   margin-left:auto;*/
-		/*   margin-right:auto;*/
-		/*   display:block;*/
-		/*}*/
-	</style>
+	
 
 	<body>
 	<button type="button" id="drawTypeButton">Pictures!</button>
-	<button type="button" id="gridOnButton">Turn Grid ON</button>
-	<!--<div class=container>-->
-	<!--	<div class="row">-->
-	<!--		<div class="col-md-12"></div>-->
-	<!--	</div>-->
-	<!--</div>-->
+	<button type="button" id="recognitionOnButton">Turn Recognizer ON</button>
+	<!--I dont know if these are needed-->
 	<p id="log"></p>
 	<div class = "sketchProject"></div>
-	
 	<div id="chart"></div>
+	<div style="border-style: outset; position:absolute; left: 10; top: 50" >
+		<h3>[CVA, CVP, ERA, ERP]</h3>
+		<ul id="elementlist">
+			<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
+			<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
+			<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
+			<li id="line">Line...........[<span>0 0 0 0</span>]</li>
+		</ul>
+		<center style="font-family: 'Montserrat', sans-serif;">I think its a <span id="prediction">...nothing yet.</span></center>
+	</div>
 	<script type="text/paperscript" canvas="canvas">
+	// add a button for switching between drawing text and images
 	$("#drawTypeButton").click(function(){
 		$(this).toggleClass("picture");
 		if ($(this).hasClass("picture"))
@@ -64,19 +50,62 @@
 		else
 			$(this).text("Pictures!");
 	});
-	// $("#gridOnButton").click(function(){
-	// 	$(this).toggleClass("gridOn");
-	// 	if ($(this).hasClass("gridOn"))
-	// 		$(this).text("Turn Grid OFF");
-	// 	else
-	// 		$(this).text("Turn Grid ON");
-	// });
 	
-
+	$("#recognitionOnButton").click(function(){
+		$(this).toggleClass("on");
+		if ($(this).hasClass("on"))
+			$(this).text("Turn Recognizer OFF");
+		else
+			$(this).text("Turn Recognizer ON");
+	});
+	// Global variables for detecting start and end points of a line
+	// really bad right?? oops
+	var startPoint;
+	var EndPoint;
+	// more globalllls
+	var downtime;
+	var uptime;
+	
+	// ...... GEOMETRIC FUNCTIONS .......
 	function distance(x1, x2, y1, y2) {
-	    return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+    	return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+	}
+
+	var getExtremes = function(stroke){
+		var minx = Number.MAX_VALUE; var maxx = Number.MIN_VALUE;
+		var miny = Number.MAX_VALUE; var maxy = Number.MIN_VALUE;
+		for (i=0; i<stroke.getNumPoints(); i++){
+			var p = stroke.getPointAt(i);
+			minx = Math.min(p.getX(), minx);
+			miny = Math.min(p.getY(), miny);
+			maxx = Math.max(p.getX(), maxx);
+			maxy = Math.max(p.getY(), maxy);
+		}
+		return {"min_x":minx, "max_x":maxx, "min_y":miny, "max_y":maxy};
+	}
+
+	var range = function(sketch){
+		var extreme =  getExtremes(sketch);
+		xrange = extreme["max_x"]-extreme["min_x"];
+		yrange = extreme["max_y"]-extreme["min_y"];
+		return {"x":xrange, "y":yrange};
 	}
 	
+	// VERY basic way of identifying box
+	// based on if ends connect and bigger than certain size
+	var isBox = function(sketch){
+		var r = range(sketch);
+		// not big enough to be a box
+		if (r["x"] < 60) return false;
+		if (r["y"] < 60) return false;
+		var num = stroke.getNumPoints();
+		var xstart = stroke.getPointAt(0).getX();
+		var xend = stroke.getPointAt(num-1).getX();
+		var ystart = stroke.getPointAt(0).getY();
+		var yend = stroke.getPointAt(num-1).getY();
+		return (distance(xstart, xend, ystart, yend) < 20);
+	}
+
 	function codeGenerationTextArea(coordinates) {
 	    var max_x = coordinates.max_x;
 	    var max_y = coordinates.max_y;
@@ -86,58 +115,11 @@
 	    var height = max_y - min_y;
 	    return [width, height];
 	}
+
+	// ...... CODE FOR ADDING ELEMENTS TO DOM .......
 	
-	var add_jquery = function(){
-		$("img").mouseover(function(){
-			$(this).fadeTo(500, 1);
-		});
-		$("img").mouseleave(function(){
-			$(this).fadeTo(500, .25);
-		});
-		$("img").click(function(){
-			var path = prompt("Insert picture url.");
-			$(this).css("content", "url("+ path +")");
-			// $(this).css("opacity", 1);
-			// $(this).attr("id", "insertedImg");
-		});
-		$("#draggable").mousedown(function(event){
-			$this = $(this);
-			$this.css("box-shadow", "10px 10px grey");
-			var init_X = event.pageX; // mouse init X
-			var init_Y	= event.pageY; // mouse init Y
-			var elem = $this.offset(); // element init position
-			$(document).mousemove(function(event){
-				var xmove = elem.left + (event.pageX - init_X);
-				var ymove = elem.top + (event.pageY - init_Y);
-				$this.css('top',ymove+"px");
-				$this.css('left',xmove+"px");
-				$(document).mouseup(function(){
-					$this.css("box-shadow", "");
-				});
-			});
-		});
-	}
-	
-	var isBox = function(sketch){
-		var r =  getRange(sketch);
-		if (r["maxx"]-r["minx"] < 60) return false;
-		if (r["maxy"]-r["miny"] < 60) return false;
-		var i = stroke.getNumPoints();
-		var xstart = stroke.getPointAt(0).getX();
-		var xend = stroke.getPointAt(i-1).getX();
-		var ystart = stroke.getPointAt(0).getY();
-		var yend = stroke.getPointAt(i-1).getY();
-		console.log(distance(xstart, xend, ystart, yend));
-		return (distance(xstart, xend, ystart, yend) < 20);
-	}
-	
-	var addHereTextArea = function(w, h, left, top){
-		// if ($("#gridOnButton").hasClass("gridOn")){
-			// var position=' style="width:' + w + 'px; height:' + h + 'px;" ';
-			// $insertion=$('.col-md-12');
-		// }
-		// else{
-			var position = ' style=" position:absolute; left:' + left
+	var addTextArea = function(w, h, left, top){
+		var position = ' style=" position:absolute; left:' + left
 			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
 			$insertion=$('.sketchProject');
 		// }
@@ -145,42 +127,73 @@
 		$insertion.after("<textarea id='draggable' placeholder='You can add text here!'"
 								+ id + position + "></textarea>");
 	}
+	
+	var addVideo = function(w, h, left, top){
+		var position = ' style=" position:absolute; left:' + left
+		+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$insertion=$('.sketchProject');
+		var id = " id=vid_placeholder ";
+ 		$insertion.after("<img src=http://cliparts.co/cliparts/qTB/oq9/qTBoq959c.png "
+							+ id + position + "></img>")
+	}
 
-	var addHereImage = function(w, h, left, top){
+	var addButton = function(w, h, left, top){
+	var source = "http://www.downloadclipart.net/large/11034-small-button-design.png";
+	// var source = '';
+	var position = ' style=" position:absolute; left:' + left
+	+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+	$('.sketchProject').after("<img src=" + source + " id=button_placeholder "
+								+ position + "></img>");
+	}
+	
+	var addImage = function(w, h, left, top){
 		var position = ' style=" position:absolute; left:' + left
 			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
 		var id = " id=drawnObject ";
-		$('.sketchProject').after("<img id='draggable' src=https://getuikit.com/docs/images/placeholder_600x400.svg "
+		$('.sketchProject').after("<img id='picture' src=https://getuikit.com/docs/images/placeholder_600x400.svg "
 								+ id + position + "></img>");
 	}
 	
-	var getRange = function(stroke){
-		var minx = 100000000; var maxx = -100000000;
-		var miny = 100000000; var maxy = -100000000;
-		for (i=0; i<stroke.getNumPoints(); i++){
-			var p = stroke.getPointAt(i);
-			minx = Math.min(p.getX(), minx);
-			miny = Math.min(p.getY(), miny);
-			maxx = Math.max(p.getX(), maxx);
-			maxy = Math.max(p.getY(), maxy);
+	var addLine = function(){
+		path = new Path();
+		path.strokeColor = 'black';
+		path.strokeWidth = 2;
+		var rise = Math.abs(endPoint.y-startPoint.y);
+		var run = Math.abs(endPoint.x-startPoint.x);
+		var slope = Math.atan(rise/run);
+		var canvas = document.getElementById('canvas');
+		
+		
+		var width = canvas.width;
+		var height = canvas.height;
+
+		// if the line is near horizontal, snap it to horizontal
+		if (slope < .1){
+			// if the line runs across most of the screen, stretch it.
+			if (canvas.width - run < canvas.width/10){
+				startPoint = new Point(0, startPoint.y);
+				endPoint = new Point(canvas.width, startPoint.y);
+			}
+			else
+				endPoint = new Point(endPoint.x, startPoint.y);
 		}
-		return {"minx":minx, "maxx":maxx, "miny":miny, "maxy":maxy};
+		path.add(startPoint);
+		path.add(endPoint);
 	}
 
-	var startPoint_x;
-	var startPoint_y;
+	// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
 	function onMouseDown(event) {
 		// PaperJS add a new Path object and initial starting point
+		downtime = new Date().getTime();
 		path = new Path();
 		path.strokeColor = 'blue';
 		path.strokeWidth = 2;
 		path.add(event.point);
-		
+		startPoint = event.point;
 		
 		// SRLlib add a new Stroke object and initial starting point
 		stroke = new srlib.core.data.container.Stroke();
 		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-		console.log(point);
 		startPoint_x = point.x;
 		startPoint_y = point.y;
 		if (typeof sketch == "undefined") {
@@ -192,53 +205,54 @@
 	}
 
 	function onMouseDrag(event) {
-	// PaperJS add points to Path object on mouse drag
-	path.add(event.point);
-	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-	sketch.addPoint(point);
-	stroke.addPoint(point);
-	
+		// PaperJS add points to Path object on mouse drag
+		path.add(event.point);
+		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
+		sketch.addPoint(point);
+		stroke.addPoint(point);
 	}
 
 	function onMouseUp(event) {
-		// VERY basic way of identifying box
-		// based on if ends connect and bigger than certain size
-		if (isBox(stroke)){
-			var ranges = getRange(stroke);
-			console.log(ranges);
-			var coordinates = {max_x: ranges["maxx"], min_x: ranges["minx"],
-							   max_y: ranges["maxy"], min_y: ranges["miny"]};
-			var width = codeGenerationTextArea(coordinates)[0];
-			var height = codeGenerationTextArea(coordinates)[1];
-			if ($('button').hasClass('picture'))
-				addHereTextArea(width, height, startPoint_x, startPoint_y);
-			else
-				addHereImage(width, height, startPoint_x, startPoint_y);
+		// recognize(stroke.getPoints());
+		// if (isBox(stroke)){
+		uptime = new Date().getTime();
+		// if (uptime-downtime < 2000){
+		console.log(sketch);
+		// }
+		if ($('#recognitionOnButton').hasClass('on')){
+			path.removeSegments();
+			endPoint = event.point;
+			var shape = recognize(stroke.getPoints());
+			if (shape == "line") addLine();
+			if (shape == "rectangle"){
+				var coordinates = getExtremes(stroke);
+				var width = codeGenerationTextArea(coordinates)[0];
+				var height = codeGenerationTextArea(coordinates)[1];
+				if ($('#drawTypeButton').hasClass('picture'))
+					addTextArea(width, height, startPoint_x, startPoint_y);
+				else
+					addImage(width, height, startPoint_x, startPoint_y);
+			}
+			add_jquery();
 		}
-		path.removeSegments();
-	add_jquery();
 	}
-	
+/*
+	<div style="border-style: outset; position:absolute; left: 10; top: 50" >
+		<h3>[CVA, CVP, ERA, ERP]</h3>
+		<ul id="elementlist">
+			<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
+			<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
+			<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
+			<li id="line">Line...........[<span>0 0 0 0</span>]</li>
+		</ul>
+		<center style="font-family: 'Montserrat', sans-serif;">I think its a <span id="prediction">...nothing yet.</span></center>
+	</div>
 
+*/
 	</script>	
 	
 	<canvas id="canvas" rezise="true"></canvas>
 	
-   </body>
- </html>
+	</body>
+</html>
 
-<script>
-	 // jquery archives
- 	// $("img").mouseover(function() {
-	//   $(this).animate(
-	//   	{opacity: 1},
-	//   	500);
-	// });
-
-	// $("img").mouseover(function(){
-	// 	$(this).css("box-shadow", "5px 5px grey");
-	// });
-	// $("img").mouseleave(function () {
-	// 	$(this).css("box-shadow", "");
-	// });
-</script>

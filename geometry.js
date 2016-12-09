@@ -1,4 +1,4 @@
-function calculateDistance(x1, x2, y1, y2) {
+function distance(x1, x2, y1, y2) {
     return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
 }
 
@@ -10,5 +10,4 @@ function codeGenerationTextArea(coordinates) {
     var width = max_x - min_x;
     var height = max_y - min_y;
     return [width, height];
-    
 }
