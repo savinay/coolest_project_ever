@@ -1,6 +1,8 @@
 <html>
 	<head>
 		<title>PaperJS - Starter Canvas</title>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 		<!--For using jquery!-->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		  <!--integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="-->
@@ -17,6 +19,7 @@
 		<link href="css/style.css" rel='stylesheet' type='text/css'/>
 		<!--this is the styling for the elements added to the screen-->
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<script type="text/javascript" src="jq.js"></script>
 		<script type="text/javascript" src="geometry.js"></script>
 		<!--this is the reconizer of shapes-->
@@ -27,6 +30,9 @@
 	<body>
 	<button type="button" id="drawTypeButton">Pictures!</button>
 	<button type="button" id="recognitionOnButton">Turn Recognizer ON</button>
+	<button type="button" id="recognizeFigure">Recognize</button>
+	<button type="button" id="reset">Reset</button>
+	
 	<!--I dont know if these are needed-->
 	<p id="log"></p>
 	<div class = "sketchProject"></div>
@@ -41,6 +47,9 @@
 		</ul>
 		<center style="font-family: 'Montserrat', sans-serif;">I think its a <span id="prediction">...nothing yet.</span></center>
 	</div>
+	<!--<div class="embed-responsive embed-responsive-4by3" style="">-->
+	<!--    <iframe class="embed-responsive-item" src="//www.youtube.com/embed/ePbKGoIGAXY" style="height:30%; width: 30%;"></iframe>-->
+	<!--</div>-->
 	<script type="text/paperscript" canvas="canvas">
 	// add a button for switching between drawing text and images
    	function toggleRecognizer() {
@@ -69,6 +78,18 @@
 		toggleRecognizer()
 	});
 	
+	$("#recognizeFigure").click(function() {
+		recognizeShape();	
+	});
+	$("#reset").click(function() {
+		resetAll();
+	})
+	
+	var resetAll = function () {
+		sketch = new srlib.core.data.container.Sketch();
+		console.log(sketch);
+	}
+	
 
 	$(document).on("keypress", function (e) {
 		// console.log(e.which);
@@ -84,23 +105,121 @@
 	// more globals
 	var starttime;
 	var endtime;
+	var countMouseDown = 0;
+	var combined_stroke = {};
+	combined_stroke["outer_shape"] = [];
+	combined_stroke["inner_shape"] = []; 
 	
 	// ...... GEOMETRIC FUNCTIONS .......
 	function distance(x1, x2, y1, y2) {
     	return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
 	}
+	
+	var recognizeShape = function () {
+		// var combined_stroke = [];
+		var all_strokes = sketch.getStrokes();
+		console.log(combined_stroke);
+		path.removeSegments();
+		endPoint = event.point;
+		console.log(combined_stroke["outer_shape"]);
+		var shape = recognize(combined_stroke["outer_shape"]); //stroke.getPoints() 
+		console.log("stroke: ", stroke);
+		if (shape == "line") addLine();
+		console.log("outer_shape: ", shape);
+		if (shape == "rectangle"){
+			var coordinates = getExtremes(combined_stroke["outer_shape"]);
+			// var coordinates = getExtremes(combined_stroke["outer_shape"]);
+			var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
+			var width = codeGenerationTextArea(coordinates)[0];
+			var height = codeGenerationTextArea(coordinates)[1];
+			console.log("area: ", (coordinates.max_x - coordinates.min_x) * (coordinates.max_y - coordinates.min_y));
+			var area = (coordinates.max_x - coordinates.min_x) * (coordinates.max_y - coordinates.min_y);
+			if (area > 2000) {
+				if (combined_stroke["inner_shape"].length > 0) {
+				// var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
+					var inner_shape = recognize(combined_stroke["inner_shape"]);
+					console.log(inner_shape);
+					if (inner_shape == "triangle") {
+						// alert("It's a video");
+						var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
+						var mid_point = (coordinates.max_x + coordinates.min_x)/2;
+						console.log("inner_shape: ", mid_point, coordinates_inner_shape.max_x, coordinates_inner_shape.min_x);
+						if (coordinates_inner_shape.max_x < mid_point * 1.1 && coordinates_inner_shape.min_x > mid_point * 0.9) {
+							addVideo(width, height, startPoint_x_outer, startPoint_y_outer);
+						}  else if (coordinates_inner_shape.max_x > mid_point * 1.1) {
+							addDropdown(width, height, startPoint_x_outer, startPoint_y_outer);
+						}
+						// addVideo(width, height, startPoint_x_outer, startPoint_y_outer);
+						// addDropdown(width, height, startPoint_x_outer, startPoint_y_outer);
+					} else if (inner_shape == "rectangle") {
+						// alert("It's an image");
+						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
+					} else if (inner_shape == "line") {
+						// alert("It's a button");
+						addButton(width, height, startPoint_x_outer, startPoint_y_outer);
+					} else if (inner_shape == "circle") {
+						// alert ("its a search bar")
+						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
+					} 
+				} else {
+					// alert ("It's a textarea");
+					addTextArea(width, height, startPoint_x_outer, startPoint_y_outer);
+				}
+			} else {
+				// alert ("It's a checkbox");
+				addCheckBox(width, height, startPoint_x_outer, startPoint_y_outer);
+			}
+			
+			
+			// var coordinates = getExtremes(combined_stroke["outer_shape"]);
+			// var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
+			// var width = codeGenerationTextArea(coordinates)[0];
+			// var height = codeGenerationTextArea(coordinates)[1];
+			// if ($('#drawTypeButton').hasClass('picture'))
+			// 	addTextArea(width, height, startPoint_x_outer, startPoint_y_outer);
+			// else
+			// 	addImage(width, height, startPoint_x_outer, startPoint_y_outer);
+		}
+		
+		if (shape == "circle") {
+			alert("Its a radio button");
+			addRadioButton(width, height, startPoint_x_outer, startPoint_y_outer);
+		}
+		add_jquery();
+	}
 
 	var getExtremes = function(stroke){
+		console.log("strokes: ", stroke);
 		var minx = Number.MAX_VALUE; var maxx = Number.MIN_VALUE;
 		var miny = Number.MAX_VALUE; var maxy = Number.MIN_VALUE;
-		for (i=0; i<stroke.getNumPoints(); i++){
-			var p = stroke.getPointAt(i);
+		for (i=0; i<stroke.length; i++){
+			var p = stroke[i];
 			minx = Math.min(p.getX(), minx);
 			miny = Math.min(p.getY(), miny);
 			maxx = Math.max(p.getX(), maxx);
 			maxy = Math.max(p.getY(), maxy);
 		}
-		return {"min_x":minx, "max_x":maxx, "min_y":miny, "max_y":maxy};
+		var width = maxx - minx;
+		var height = maxy - miny;
+		var inner_box_minx = minx + width*0.2;
+		var inner_box_maxx = maxx - width*0.2;
+		var inner_box_miny = miny + height*0.2;
+		var inner_box_maxy = maxy - height*0.2;
+		
+		return {"min_x":minx, "max_x":maxx, "min_y":miny, "max_y":maxy, "inner_box_minx":inner_box_minx, 
+		"inner_box_maxx": inner_box_maxx, "inner_box_miny":inner_box_miny,"inner_box_maxy":inner_box_maxy };
+	}
+	
+	var getInnerPoints = function (stroke, coordinates) {
+		var inner_points = [];
+		for (i=0; i<stroke.length; i++){
+			var p = stroke[i];
+			if (p.getX() > coordinates.inner_box_minx && p.getX() < coordinates.inner_box_maxx 
+			&& p.getY() > coordinates.inner_box_miny && p.getY() < coordinates.inner_box_maxy){
+				inner_points.push(p);
+			}
+		}
+		return inner_points;
 	}
 
 	var range = function(sketch){
@@ -138,34 +257,52 @@
 	// ...... CODE FOR ADDING ELEMENTS TO DOM .......
 	
 	var addTextArea = function(w, h, left, top){
+		paper.project.clear();
 		var position = ' style=" position:absolute; left:' + left
 			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
 			$insertion=$('.sketchProject');
 		// }
 		var id = " id=drawnObject ";
-		$insertion.after("<textarea id='draggable' placeholder='You can add text here!'"
+		// $insertion.after("<textarea id='draggable' placeholder='You can add text here!'"
+		// 						+ id + position + "></textarea>");
+		$insertion.after("<textarea placeholder='You can add text here!'"
 								+ id + position + "></textarea>");
+		// $insertion.after("<pre><textarea placeholder='You can add text here!' id='drawnObject' style='' + ></textarea></pre>")
 	}
 	
 	var addVideo = function(w, h, left, top){
+		// path = new Path();
+		// old_path.remove();
+		paper.project.clear();
+		
 		var position = ' style=" position:absolute; left:' + left
 		+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
 		$insertion=$('.sketchProject');
 		var id = " id=vid_placeholder ";
  		$insertion.after("<img src=http://cliparts.co/cliparts/qTB/oq9/qTBoq959c.png "
 							+ id + position + "></img>")
+		// $insertion.after("<iframe src=https://www.youtube.com/embed/eHZifpgyH_4 width=560 height=315 frameborder=0 allowfullscreen></iframe>")
 	}
-
+	
+	var addDropdown = function(w, h, left, top){
+		console.log("adding dropdown");
+		paper.project.clear();
+		var position = ' style=" position:absolute; left:' + left
+		+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$('.sketchProject').after("<select" + position + "><option value='volvo'>Volvo</option><option value='saab'>Saab</option><option value='opel'>Opel</option><option value='audi'>Audi</option></select>")
+	}
 	var addButton = function(w, h, left, top){
-	var source = "http://www.downloadclipart.net/large/11034-small-button-design.png";
-	// var source = '';
-	var position = ' style=" position:absolute; left:' + left
-	+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
-	$('.sketchProject').after("<img src=" + source + " id=button_placeholder "
+		paper.project.clear();
+		var source = "http://www.downloadclipart.net/large/11034-small-button-design.png";
+		// var source = '';
+		var position = ' style=" position:absolute; left:' + left
+		+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$('.sketchProject').after("<img src=" + source + " id=button_placeholder "
 								+ position + "></img>");
 	}
 	
 	var addImage = function(w, h, left, top){
+		paper.project.clear();
 		var position = ' style=" position:absolute; left:' + left
 			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
 		var id = " id=drawnObject ";
@@ -199,22 +336,68 @@
 		path.add(startPoint);
 		path.add(endPoint);
 	}
+	
+	var addCheckBox = function (w, h, left, top) {
+		paper.project.clear();
+		var position = ' style=" position:absolute; left:' + left
+			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$('.sketchProject').after("<input type='checkbox' name='' value=''" + position + ">Lorem Ipsum")
+		// var checkbox = document.createElement('input');
+		// checkbox.type = "checkbox";
+		// checkbox.name = "name";
+		// checkbox.value = "value";
+		// checkbox.id = "id";
+		
+		// var label = document.createElement('label')
+		// label.htmlFor = "id";
+		// label.appendChild(document.createTextNode('text for label after checkbox'));
+		
+		// $('.sketchProject').appendChild(checkbox);
+		// $('.sketchProject').appendChild(label);
+	}
+	
+	var addRadioButton = function (w, h, left, top) {
+		paper.project.clear();
+		var position = ' style=" position:absolute; left:' + left
+			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$('.sketchProject').after("<input type='radio' name='' value=''" + position + ">Lorem Ipsum")
+		
+	}
+	
+	var addSearchBar = function (w, h, left, top) {
+		paper.project.clear();
+		var position = ' style=" position:absolute; left:' + left
+			+ 'px; top:' + top + 'px; width:' + w + 'px; height:' + h + 'px;" ';
+		$('.sketchProject').after("<input type='text' name='search' placeholder='Search..'" + position + ">")
+	}
 
 	// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
 	function onMouseDown(event) {
 		// PaperJS add a new Path object and initial starting point
+		countMouseDown += 1;
 		endtime = new Date().getTime();
+		// var old_path = path;
 		path = new Path();
+		
+		
 		path.strokeColor = 'blue';
 		path.strokeWidth = 2;
 		path.add(event.point);
 		startPoint = event.point;
+		sketch = new srlib.core.data.container.Sketch();
 		
 		// SRLlib add a new Stroke object and initial starting point
 		stroke = new srlib.core.data.container.Stroke();
 		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-		startPoint_x = point.x;
-		startPoint_y = point.y;
+		if (countMouseDown==1) {
+			startPoint_x_outer = point.x;
+			startPoint_y_outer = point.y;
+		}
+		if (countMouseDown == 2) {
+			startPoint_x_inner = point.x;
+			startPoint_y_inner = point.y;
+		}
+		
 		console.log(Math.abs(endtime-starttime));
 		if (Math.abs(endtime-starttime) > 2000 || typeof sketch == "undefined"){
 			sketch = new srlib.core.data.container.Sketch();
@@ -236,28 +419,56 @@
 		// recognize(stroke.getPoints());
 		// if (isBox(stroke)){
 		starttime = new Date().getTime();
-		var combined_stroke = [];
+		// var combined_stroke = [];
 		var all_strokes = sketch.getStrokes();
-		for (var key in all_strokes)
-			combined_stroke = combined_stroke.concat(all_strokes[key].getPoints());
-		if (Math.abs(endtime-starttime) > 2000){
-			if ($('#recognitionOnButton').hasClass('on')){
-				path.removeSegments();
-				endPoint = event.point;
-				var shape = recognize(combined_stroke); //stroke.getPoints() 
-				if (shape == "line") addLine();
-				if (shape == "rectangle"){
-					var coordinates = getExtremes(stroke);
-					var width = codeGenerationTextArea(coordinates)[0];
-					var height = codeGenerationTextArea(coordinates)[1];
-					if ($('#drawTypeButton').hasClass('picture'))
-						addTextArea(width, height, startPoint_x, startPoint_y);
-					else
-						addImage(width, height, startPoint_x, startPoint_y);
-				}
-				add_jquery();
-			}
+		if(countMouseDown == 1) {
+			for (var key in all_strokes)
+				combined_stroke["outer_shape"] = combined_stroke["outer_shape"].concat(all_strokes[key].getPoints());
 		}
+		if (countMouseDown == 2) {
+			var coordinates = getExtremes(combined_stroke["outer_shape"]);
+			var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
+			console.log(inner_points);
+			for (var key in all_strokes)
+				combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
+		}
+		
+		console.log(combined_stroke, countMouseDown);
+		
+		// for (var key in all_strokes)
+		// 	combined_stroke = combined_stroke.concat(all_strokes[key].getPoints());
+			
+		
+		// console.log("inside mouseup: ", Math.abs(endtime-starttime));
+		// if (Math.abs(endtime-starttime) > 2000){
+		// console.log(combined_stroke);
+		// console.log("time > 2000");
+		// if ($('#recognitionOnButton').hasClass('on')){
+		// 	path.removeSegments();
+		// 	endPoint = event.point;
+		// 	// var shape = recognize(combined_stroke);
+		// 	var shape = recognize(combined_stroke); //stroke.getPoints() 
+		// 	if (shape == "line") addLine();
+		// 	if (shape == "rectangle"){
+				
+		// 		var coordinates = getExtremes(stroke);
+		// 		var inner_points = getInnerPoints(stroke, coordinates);
+		// 		// findIntersectingPoints();
+		// 		console.log("inner_box: ", recognize(inner_points));
+		// 		var width = codeGenerationTextArea(coordinates)[0];
+		// 		var height = codeGenerationTextArea(coordinates)[1];
+		// 		if ($('#drawTypeButton').hasClass('picture'))
+		// 			addTextArea(width, height, startPoint_x, startPoint_y);
+		// 		else
+		// 			addImage(width, height, startPoint_x, startPoint_y);
+		// 	}
+		// 	add_jquery();
+		// }
+		// } else {
+		// for (var key in all_strokes)
+		// 	combined_stroke = combined_stroke.concat(all_strokes[key].getPoints());
+		// 	console.log(combined_stroke);
+	// }
 	}
 /*
 	<div style="border-style: outset; position:absolute; left: 10; top: 50" >

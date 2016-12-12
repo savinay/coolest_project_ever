@@ -153,7 +153,7 @@ function recognize(figure) {
     
     
     // Identifying a rectangle - WORKING
-    if (areaCV/areaER > 0.8 && areaCV/areaER < 1) {
+    if (areaCV/areaER > 0.8 && areaCV/areaER <= 1) {
     	identified = "rectangle";
     	// insert the condition to identify text area and images 
     }
@@ -165,12 +165,12 @@ function recognize(figure) {
     }
 
     // Identifying a circle - WORKING
-    else if (areaCV/areaER >= 0.6 && areaCV/areaER <= 0.8) {
+    else if (areaCV/areaER >= 0.7 && areaCV/areaER <= 0.8) {
     	identified = "circle";
     }
 
     // Identifying a triangle - WORKING
-    else if (areaCV/areaER > 0.4 && areaCV/areaER < 0.6 
+    else if (areaCV/areaER > 0.4 && areaCV/areaER < 0.7 
     && Distance(figure[0].x,figure[0].y,figure[n-1].x,figure[n-1].y)/arclength < 0.05) {
     	identified = "triangle";
     }
@@ -179,7 +179,7 @@ function recognize(figure) {
 	$("#prediction").html(identified);
 	var possible_shapes = get_stored_units();
 	var prediction = identify(sketch_unit, possible_shapes);
-	verify(identified, sketch_unit, possible_shapes);
+	// verify(identified, sketch_unit, possible_shapes);
 	return(identified);
     // Identifying a wavyline
    // else if (CV[1].length/n <= 0.3 ) {
