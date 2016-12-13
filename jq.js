@@ -2,6 +2,8 @@
 
 // have to add jquerry each time a new element is added
 // so this function is called by the mouse_up
+$("button").toggleClass("btn btn-primary");
+
 
 var add_jquery = function(){
     $("#picture").mouseover(function(){
@@ -44,6 +46,8 @@ var add_jquery = function(){
 		$('.sketchProject').after("<button " + position + click_action + ">BUTTON</button>");
     });
 
+    $("button").toggleClass("btn btn-primary");
+    
     // trying to make elems draggable... not working
     // the element doesn't get "unselected" when the mouse is released
     $("#draggable").mousedown(function(event){
