@@ -1,65 +1,10 @@
-<html>
-	<head>
-		<title>PaperJS - Starter Canvas</title>
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-		<!--For using jquery!-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-		  <!--integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="-->
-		  <!--crossorigin="anonymous"></script>-->
-		<!-- An AMD-loader like RequireJS is necessary for srlib's asynchronous modules -->
-		<script src="js/require.js"></script>
-		<!-- Load srlib following RequireJS -->
-		<script src="js/srlib.js"></script>	
-		<!--Paper JS-->
-		<script src="js/paper-full.js"></script>
-		<!--cool font-->
-		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-		<!--Fonts and styling -- needed?-->
-		<link href="css/style.css" rel='stylesheet' type='text/css'/>
-		<!--this is the styling for the elements added to the screen-->
-		<link rel="stylesheet" type="text/css" href="style.css">
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-		<script type="text/javascript" src="jq.js"></script>
-		<script type="text/javascript" src="addingelems.js"></script>
-		<!--this is the reconizer of shapes-->
-		<script type="text/javascript" src="recognizer.js"></script>
-	</head>
-	
-
-	<body>
-		<button type="button" id="drawTypeButton">Pictures!</button>
-		<button type="button" id="recognitionOnButton">Turn Recognizer ON</button>
-		<button type="button" id="recognizeFigure">Recognize</button>
-		<button type="button" id="reset">Reset</button>
-		
-		<!--All Objects get inserted inserted after this-->
-		<div class="elem_container"></div>
-		<!--All Objects get inserted inserted after this-->
-		<div class ="sketchProject"></div>
-	
-		<div style="border-style: outset; position:absolute; left: 10; top: 50" >
-			<h3>[CVA, CVP, ERA, ERP]</h3>
-			<ul id="elementlist">
-				<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
-				<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
-				<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
-				<li id="line">Line...........[<span>0 0 0 0</span>]</li>
-			</ul>
-			<center style="font-family: 'Montserrat', sans-serif;">I think its a
-							<span id="prediction">...nothing yet.</span></center>
-		</div>
-	</body>
-
-
-
 <script type="text/paperscript" canvas="canvas">
 	var elements=$(".elem_container");
 	$("button").toggleClass("btn btn-primary");
 	// add a button for switching between drawing text and images
    	function toggleRecognizer() {
 		var recognizer = $("#recognitionOnButton");
-		recognizer.toggleClass("on btn btn-primary");
+		recognizer.toggleClass("on");
 		if (recognizer.hasClass("on"))
 			recognizer.text("Turn Recognizer OFF");
 		else
@@ -68,7 +13,7 @@
 
 	function toggleRectangleType(){
 		var rectangleType = $("#drawTypeButton");
-		rectangleType.toggleClass("picture btn btn-primary");
+		rectangleType.toggleClass("picture");
 		if (rectangleType.hasClass("picture"))
 			rectangleType.text("Text Areas!");
 		else
@@ -86,13 +31,13 @@
 	$("#recognizeFigure").click(function() {
 		recognizeShape();	
 	});
-
 	$("#reset").click(function() {
 		resetAll();
 	})
 	
 	var resetAll = function () {
 		sketch = new srlib.core.data.container.Sketch();
+		console.log(sketch);
 	}
 	
 
@@ -101,7 +46,7 @@
     	if (e.which == 32) //space bar pressed
     		toggleRecognizer();
     	if (e.which == 114) // r pressed
-    		recognizeShape();
+    		toggleRectangleType();
 	});
 	// Global variables for detecting start and end points of a line
 	// really bad right?? oops
@@ -289,7 +234,3 @@
 	</script>	
 	
 <canvas id="canvas" rezise="true"></canvas>
-	
-	
-</html>
-
