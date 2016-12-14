@@ -87,7 +87,7 @@
 		if (e.which == 32) // space bar pressed
 			recognizeShape();
 		else if (e.which == 114) // 'r' pressed
-			location.reload();
+			$(".elem_container").empty();
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
 	});
@@ -112,6 +112,8 @@
 			if (area > 2000) {
 				if (combined_stroke["inner_shape"].length > 0) {
 					var inner_shape = recognize(combined_stroke["inner_shape"]);
+					var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
+					var mid_point = (coordinates.max_x + coordinates.min_x)/2;
 					console.log(inner_shape);
 					if (inner_shape == "triangle") {
 						var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
@@ -133,8 +135,9 @@
 							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 						
-					else if (inner_shape == "circle")
+					else if ((inner_shape == "circle" || inner_shape == "rectangle") && coordinates_inner_shape.max_x > mid_point * 1.1 && (coordinates.max_y - coordinates.min_y)/(coordinates.max_x - coordinates.min_x) < 0.4 ) {
 						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
+					}
 					
 				} else
 					addTextArea(width, height, startPoint_x_outer, startPoint_y_outer);
@@ -148,6 +151,11 @@
 		}
 		paper.project.clear();
 		add_jquery();
+		countMouseDown = 0;
+		sketch = new srlib.core.data.container.Sketch();
+		path = new Path();
+		stroke = new srlib.core.data.container.Stroke();
+		point = new srlib.core.data.container.Point();
 	}
 
 	
