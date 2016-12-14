@@ -32,13 +32,16 @@
 		<button type="button" id="recognitionOnButton">Turn Recognizer ON</button>
 		<button type="button" id="recognizeFigure">Recognize</button>
 		<button type="button" id="reset">Reset</button>
-		
+		<div id="code" style="width: 500px; float: right;">
+			
+		</div>
 		<!--All Objects get inserted inserted after this-->
 		<div class="elem_container"></div>
 		<!--All Objects get inserted inserted after this-->
 		<div class ="sketchProject"></div>
-	
-		<div style="border-style: outset; position:absolute; left: 10; top: 50" >
+		
+				
+		<div style="border-style: outset; position:absolute; left: 10; top: 50; visibility: hidden;" >
 			<h3>[CVA, CVP, ERA, ERP]</h3>
 			<ul id="elementlist">
 				<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
@@ -129,7 +132,7 @@
 		console.log(combined_stroke["outer_shape"]);
 		var shape = recognize(combined_stroke["outer_shape"]); //stroke.getPoints() 
 		console.log("stroke: ", stroke);
-		if (shape == "line") addLine();
+		// if (shape == "line") addLine();
 		console.log("outer_shape: ", shape);
 		if (shape == "rectangle"){
 			var coordinates = getExtremes(combined_stroke["outer_shape"]);
@@ -146,18 +149,24 @@
 						var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
 						var mid_point = (coordinates.max_x + coordinates.min_x)/2;
 						console.log("inner_shape: ", mid_point, coordinates_inner_shape.max_x, coordinates_inner_shape.min_x);
-						if (coordinates_inner_shape.max_x < mid_point * 1.1 && coordinates_inner_shape.min_x > mid_point * 0.9)
+						if (coordinates_inner_shape.max_x < mid_point * 1.1 && coordinates_inner_shape.min_x > mid_point * 0.9) {
 							addVideo(width, height, startPoint_x_outer, startPoint_y_outer);
+							
+						}
 						else if (coordinates_inner_shape.max_x > mid_point * 1.1)
 							addDropdown(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 					else if (inner_shape == "rectangle")
 						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
 					else if (inner_shape == "line") {
-						// getEndPointsOfLine();
+						var slope = getEndPointsOfLine(combined_stroke["inner_shape"]);
+						if (slope <= 0.1) {
+							addButton(width, height, startPoint_x_outer, startPoint_y_outer);
+						}
+						if (slope >= 0.9) {
+							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);	
+						}
 						
-						addButton(width, height, startPoint_x_outer, startPoint_y_outer);
-						addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 						
 					else if (inner_shape == "circle")
@@ -197,6 +206,13 @@
 		
 		return {"min_x":minx, "max_x":maxx, "min_y":miny, "max_y":maxy, "inner_box_minx":inner_box_minx, 
 		"inner_box_maxx": inner_box_maxx, "inner_box_miny":inner_box_miny,"inner_box_maxy":inner_box_maxy };
+	}
+	
+	var getEndPointsOfLine = function (points) {
+		var rise = Math.abs(points[points.length - 1].y-points[0].y);
+		var run = Math.abs(points[points.length - 1].x-points[0].x);
+		var slope = Math.atan(rise/run);
+		return slope;
 	}
 	
 	var getInnerPoints = function (stroke, coordinates) {

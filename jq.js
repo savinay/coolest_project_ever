@@ -28,6 +28,8 @@ var add_jquery = function(){
 		    + " style='position:absolute; top:"+top+"; left:"+left+"; '>"
 		    + "<iframe src='" + path + "' height="+height+"></iframe>"
 		    + "</div>");
+		var code = "&lt;iframe src='" +path +  "'&gt;&lt;/iframe&gt;"
+	    addCode(top, code);
     });
     
     $("#button_placeholder").click(function(){
@@ -44,6 +46,8 @@ var add_jquery = function(){
     	+ '; top:' + top + '; width:' + w + '; height:' + h + ';" ';
         $(this).remove();
 		$('.sketchProject').after("<button " + position + click_action + ">BUTTON</button>");
+		var code = "&lt;button" + click_action + "&gt;BUTTON&lt;/button&gt;";
+		addCode(top, code);
     });
 
     $("button").toggleClass("btn btn-primary");

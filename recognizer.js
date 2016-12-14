@@ -153,7 +153,7 @@ function recognize(figure) {
     
     
     // Identifying a rectangle - WORKING
-    if (areaCV/areaER > 0.8 && areaCV/areaER <= 1) {
+    if (areaCV/areaER > 0.85 && areaCV/areaER <= 1) {
     	identified = "rectangle";
     	// insert the condition to identify text area and images 
     }
@@ -165,7 +165,7 @@ function recognize(figure) {
     }
 
     // Identifying a circle - WORKING
-    else if (areaCV/areaER >= 0.7 && areaCV/areaER <= 0.8) {
+    else if (areaCV/areaER >= 0.7 && areaCV/areaER <= 0.85) {
     	identified = "circle";
     }
 
