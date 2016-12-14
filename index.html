@@ -36,9 +36,7 @@
 		<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
 		<button type="button" id="reset" class="btn btn-primary">Reset</button>
 		
-		<div id="code" style="width: 500px; float: right;">
-	
-	    </div>
+		<div id="code" style="width: 500px; float: right;"></div>
 		
 		<!--All Objects get inserted inserted after this-->
 		<div class="elem_container"></div>
@@ -90,9 +88,11 @@
 			$(".elem_container").empty();
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
-		else if (e.which == 13){ // 'backspace' pressed
-			console.log($('.elem_container').last().html());
-			$('.elem_container').last().remove();
+		else if (e.which == 113){ // 'q' pressed
+			// $(".elem_container last-child").remove()
+			console.log($(".elem_container :last-child").html());
+			// $('.elem_container').last().remove();
+			// $('.code').last().remove();
 		}
 	});
 
