@@ -22,7 +22,7 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<script type="text/javascript" src="placeholder.js"></script>
 		<script type="text/javascript" src="addingelems.js"></script>
-		<script type="text/javascript" src="bounding.js"></script>
+		<script type="text/javascript" src="geometry.js"></script>
 		<!--this is the reconizer of shapes-->
 		<script type="text/javascript" src="recognizer.js"></script>
 		<!--include html for sidebar-->
@@ -34,6 +34,10 @@
 		<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
 		<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
 		<button type="button" id="reset" class="btn btn-primary">Reset</button>
+		
+		<div id="code" style="width: 500px; float: right;">
+	
+	    </div>
 		
 		<!--All Objects get inserted inserted after this-->
 		<div class="elem_container"></div>
@@ -96,7 +100,7 @@
 		console.log(combined_stroke["outer_shape"]);
 		var shape = recognize(combined_stroke["outer_shape"]); //stroke.getPoints() 
 		console.log("stroke: ", stroke);
-		if (shape == "line") addLine();
+		// if (shape == "line") addLine();
 		console.log("outer_shape: ", shape);
 		if (shape == "rectangle"){
 			var coordinates = getExtremes(combined_stroke["outer_shape"]);
@@ -122,9 +126,11 @@
 						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
 					else if (inner_shape == "line") {
 						// getEndPointsOfLine();
-						
-						addButton(width, height, startPoint_x_outer, startPoint_y_outer);
-						addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
+						var slope = getEndPointsOfLine(combined_stroke["inner_shape"]);
+						if (slope <= 0.1) 
+							addButton(width, height, startPoint_x_outer, startPoint_y_outer);
+						if (slope >= 0.9) 
+							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 						
 					else if (inner_shape == "circle")

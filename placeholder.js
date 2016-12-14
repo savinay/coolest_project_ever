@@ -40,6 +40,9 @@ var add_jquery = function(){
     		    + "</div>");
     		// remove the placeholder
     		$(this).remove();
+    		var top = $(this).css("top");
+    		var code = "&lt;iframe src='" +path + "'&gt;&lt;/iframe&gt;"
+            addCode(top, code);
     	}
     });
     
@@ -60,6 +63,9 @@ var add_jquery = function(){
     		    + message + "</a>");
 		    // remove the placeholder
 		    $(this).remove();
+		    var top = $(this).css("top");
+		    var code = "&lt;a href=" + path + " class='btn btn-info'&gt;" + message + "&lt;/button&gt;";
+            addCode(top, code);
     	}
     });
     

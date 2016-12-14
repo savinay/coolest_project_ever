@@ -7,6 +7,11 @@ function pos(left, top, w, h){
 	return position;
 }
 
+function posCode(top){
+	var position = ' style=" position:absolute; top:' + top + '" ';
+	return position;
+}
+
 var addTextArea = function(w, h, left, top){
 	var elements=$(".elem_container");
 	var id = " id=drawnObject ";
@@ -20,7 +25,7 @@ var addVideo = function(w, h, left, top){
 	var id = " id=vid_placeholder ";
  	elements.append("<img src=http://cliparts.co/cliparts/qTB/oq9/qTBoq959c.png "
 					+ id 
-					+ pos(left, top, w, h) + "></img>")
+					+ pos(left, top, w, h) + "></img>");
 }
 
 var addDropdown = function(w, h, left, top){
@@ -53,7 +58,7 @@ var addImage = function(w, h, left, top){
 var addSearchBar = function (w, h, left, top) {
 	var elements=$(".elem_container");
 	elements.append("<input type='text' name='search' placeholder='Search..'" 
-					+  pos(left, top, w, h) + ">")
+					+  pos(left, top, w, h) + " class='form-control'>")
 }
 
 var addCheckBox = function (w, h, left, top) {
@@ -70,5 +75,11 @@ var addRadioButton = function (w, h, left, top) {
 }
 
 var addNavbar = function (w, h, left, top) {
-	console.log("adding navbar");
+	var elements=$(".elem_container");
+	elements.append("<nav class='navbar navbar-default'" + pos(left, top, w) + "><div class='container-fluid'><div class='navbar-header'><a class='navbar-brand' href='#'>Brand</a></div><div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'><ul class='nav navbar-nav'><li class='active'><a href='#'>Home <span class='sr-only'>(current)</span></a></li><li><a href='#'>About Us</a></li></ul></div></div></nav>")
+}
+
+var addCode = function (top,code) {
+	var elements = $("#code");
+	elements.append("<pre" + posCode( top) + "><code>" + code + "</code></pre>")
 }
