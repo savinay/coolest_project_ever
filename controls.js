@@ -1,5 +1,6 @@
 /*global $*/
 
+	
 $("#recognitionOnButton").click(function(){
 	toggleRecognizer();
 });

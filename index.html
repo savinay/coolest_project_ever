@@ -20,10 +20,11 @@
 		<!--this is the styling for the elements added to the screen-->
 		<link rel="stylesheet" type="text/css" href="style.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-		<script type="text/javascript" src="placeholder.js"></script>
-		<script type="text/javascript" src="addingelems.js"></script>
+		
+		<script type="text/javascript" src="clickAction.js"></script>
+		<script type="text/javascript" src="addElems.js"></script>
 		<script type="text/javascript" src="geometry.js"></script>
-		<!--this is the reconizer of shapes-->
+		<script type="text/javascript" src="controls.js"></script>
 		<script type="text/javascript" src="recognizer.js"></script>
 		<!--include html for sidebar-->
 		<link rel="import" href="sidebar.html">
@@ -72,8 +73,7 @@
 	combined_stroke["outer_shape"] = [];
 	combined_stroke["inner_shape"] = []; 
 
-	// add a button for switching between drawing text and images
-   	function toggleRecognizer() {
+	function toggleRecognizer() {
 		if (recognizerOn)
 			newstate = "OFF";
 		else
@@ -90,9 +90,24 @@
 			$(".elem_container").empty();
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
+		else if (e.which == 13) // 'backspace' pressed
+			$('.elem_container').children().last().remove();
 	});
 
-	var recognizeShape = function () {
+	$("#recognitionOnButton").click(function(){
+		toggleRecognizer();
+	});
+	
+	$("#recognizeFigure").click(function() {
+		recognizeShape();	
+	});
+	
+	$("#reset").click(function() {
+		$(".elem_container").empty();
+	});
+
+
+var recognizeShape = function () {
 		var all_strokes = sketch.getStrokes();
 		console.log(combined_stroke);
 		path.removeSegments();
@@ -100,14 +115,14 @@
 		console.log(combined_stroke["outer_shape"]);
 		var shape = recognize(combined_stroke["outer_shape"]); //stroke.getPoints() 
 		console.log("stroke: ", stroke);
-		// if (shape == "line") addLine();
 		console.log("outer_shape: ", shape);
+		startPoint_x_outer -= 5;
+		startPoint_y_outer += 25;
 		if (shape == "rectangle"){
 			var coordinates = getExtremes(combined_stroke["outer_shape"]);
 			var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
 			var width = coordinates.max_x - coordinates.min_x;
 			var height = coordinates.max_y - coordinates.min_y;
-			console.log("area: ", (coordinates.max_x - coordinates.min_x) * (coordinates.max_y - coordinates.min_y));
 			var area = (coordinates.max_x - coordinates.min_x) * (coordinates.max_y - coordinates.min_y);
 			if (area > 2000) {
 				if (combined_stroke["inner_shape"].length > 0) {
@@ -135,7 +150,9 @@
 							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 						
+
 					else if ((inner_shape == "circle" || inner_shape == "rectangle") && coordinates_inner_shape.max_x > mid_point * 1.1 && (coordinates.max_y - coordinates.min_y)/(coordinates.max_x - coordinates.min_x) < 0.4 ) {
+
 						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 					
@@ -217,10 +234,8 @@
 				combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
 		}
 		
-		console.log(combined_stroke, countMouseDown);
-		
 	}
-	</script>	
+</script>	
 	
 <canvas id="canvas" rezise="true"></canvas>
 	
