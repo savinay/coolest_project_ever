@@ -90,8 +90,10 @@
 			$(".elem_container").empty();
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
-		else if (e.which == 13) // 'backspace' pressed
-			$('.elem_container').children().last().remove();
+		else if (e.which == 13){ // 'backspace' pressed
+			console.log($('.elem_container').last().html());
+			$('.elem_container').last().remove();
+		}
 	});
 
 	$("#recognitionOnButton").click(function(){
