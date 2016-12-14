@@ -6,6 +6,9 @@ textarea {
 }
 img {
     padding:1px;
-    border:1px solid #021a40;
     opacity: .25;
+}
+
+#vid {
+    padding:1px;
 }
