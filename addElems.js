@@ -113,5 +113,5 @@ var addNavbar = function (w, h, left, top) {
 
 var addCode = function (top,code) {
 	var elements = $("#code");
-	elements.append("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
+	elements.html("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
 }
