@@ -150,7 +150,9 @@ var recognizeShape = function () {
 							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 						
-					else if ((inner_shape == "circle" || inner_shape == "rectangle") && coordinates_inner_shape.max_x > mid_point * 1.1 ) {
+
+					else if ((inner_shape == "circle" || inner_shape == "rectangle") && coordinates_inner_shape.max_x > mid_point * 1.1 && (coordinates.max_y - coordinates.min_y)/(coordinates.max_x - coordinates.min_x) < 0.4 ) {
+
 						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
 					}
 					
@@ -166,6 +168,11 @@ var recognizeShape = function () {
 		}
 		paper.project.clear();
 		add_jquery();
+		countMouseDown = 0;
+		sketch = new srlib.core.data.container.Sketch();
+		path = new Path();
+		stroke = new srlib.core.data.container.Stroke();
+		point = new srlib.core.data.container.Point();
 	}
 
 	

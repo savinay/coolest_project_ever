@@ -23,6 +23,7 @@ var add_jquery = function(){
     	var path = prompt("Insert picture url.");
     	if (path != "")
         	$(this).css("content", "url("+ path +")");
+        	
     });
     
     //---------------- VIDEO ----------------
@@ -33,11 +34,14 @@ var add_jquery = function(){
     	if (path){
     	    var height = $(this).css("height");
     	    var width = $(this).css("width");
-    		$(".elem_container").append("<div id='vid'"
-    		    + " style= '" + get_pos(this) + "'>"
+    	    var string = "<div id='vid'"
+    		    +" style= '" + get_pos(this) + "'>"
     		    + "<iframe src='" + path 
     		    + "' height='"+ height +"'></iframe>"
-    		    + "</div>");
+    		    + "</div>";
+    		var code = string.replace(/\</g,"&lt;");   
+            code = string.replace(/\>/g,"&gt;");
+    		$(".elem_container").append(string);
     		// remove the placeholder
     		$(this).remove();
     		var top = $(this).css("top");
@@ -56,11 +60,14 @@ var add_jquery = function(){
     	    var strH = $(this).css("height");
     	    var boxH = parseFloat( strH.substring(0,strH.length-2) )
     	    var txtH = (7/10)*boxH;
-    		$(".elem_container").append("<a href='" + path + "'"
+    	    var string = "<a href='" + path + "'"
     		    + " style= '" + get_pos(this) 
     		    + " font-size:"+ txtH +"px; line-height: "+ txtH +"px'"
-    		    + " class='btn btn-info' >"
-    		    + message + "</a>");
+    		    + " class='btn btn-info' id='sketchbutton' >"
+    		    + message + "</a>";
+    		var code = string.replace(/\</g,"&lt;");   
+            code = string.replace(/\>/g,"&gt;");
+    		$(".elem_container").append(string);
 		    // remove the placeholder
 		    $(this).remove();
 		    var top = $(this).css("top");
