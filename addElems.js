@@ -63,15 +63,16 @@ var addSearchBar = function (w, h, left, top) {
 
 var addCheckBox = function (w, h, left, top) {
 	var elements=$(".elem_container");
-	elements.append("<input type='checkbox' name='' value=''" 
-					+ pos(left, top, w, h) + ">Lorem Ipsum")
+	elements.append("<div style='position:absolute; "
+					+ "top: "+ top +"px; left:"+ left +"px; '>"
+					+ "<input type='checkbox'> Lorem Ipsum</div>");
 }
 
 var addRadioButton = function (w, h, left, top) {
 	var elements=$(".elem_container");
-	elements.append("<input type='radio' name='' value=''"	
-					+ pos(left, top, w, h) + ">Lorem Ipsum")
-	
+	elements.append("<div style='position:absolute; "
+					+ "top: "+ top +"px; left:"+ left +"px; '>"
+					+ "<input type='radio'> Lorem Ipsum</div>");
 }
 
 var addNavbar = function (w, h, left, top) {
@@ -81,5 +82,5 @@ var addNavbar = function (w, h, left, top) {
 
 var addCode = function (top,code) {
 	var elements = $("#code");
-	elements.append("<pre" + posCode( top) + "><code>" + code + "</code></pre>")
+	elements.append("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
 }

@@ -72,7 +72,7 @@ var add_jquery = function(){
     // trying to make elems draggable... not working
     // the element doesn't get "unselected" when the mouse is released
     $("#draggable").mousedown(function(event){
-    	$this = $(this);
+    	var $this = $(this);
     	$this.css("box-shadow", "10px 10px grey");
     	var init_X = event.pageX; // mouse init X
     	var init_Y	= event.pageY; // mouse init Y
