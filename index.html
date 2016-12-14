@@ -27,7 +27,7 @@
 		<script type="text/javascript" src="controls.js"></script>
 		<script type="text/javascript" src="recognizer.js"></script>
 		<!--include html for sidebar-->
-		<link rel="import" href="sidebar.html">
+		<!--<link rel="import" href="sidebar.html">-->
 	</head>
 	
 
@@ -35,11 +35,13 @@
 		<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
 		<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
 		<button type="button" id="reset" class="btn btn-primary">Reset</button>
-		
-		<div id="code" style="width: 500px; float: right;"></div>
-		
-		<!--All Objects get inserted inserted after this-->
+		<!--All elements get inserted in this-->
 		<div class="elem_container"></div>
+		
+		<div id="code" style="position: absolute; width: 300px; border: 4px solid #73AD21; height: 100%; width: 30%; top: 0px; right: 0px;"></div>
+		<div id="includedContent"></div>
+		
+		
 		
 		<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
 			<h3>[CVA, CVP, ERA, ERP]</h3>
@@ -57,6 +59,10 @@
 
 
 <script type="text/paperscript" canvas="canvas">
+    // $(document).ready(function(){
+      $("#includedContent").load("b.html");
+    // });
+
 	// GLOBAL for jquery to know where to insert the elements
 	var elements=$(".elem_container");
 	// GLOBAL that keeps track of the state of the recognizerButton
@@ -82,7 +88,7 @@
 
 	// use keyboard shortcuts
 	$(document).on("keypress", function (e) {
-		if (e.which == 32) // space bar pressed
+		if (e.which == 97) // 'a' pressed
 			recognizeShape();
 		else if (e.which == 114) // 'r' pressed
 			$(".elem_container").empty();
@@ -90,7 +96,7 @@
 			toggleRecognizer();
 		else if (e.which == 113){ // 'q' pressed
 			// $(".elem_container last-child").remove()
-			console.log($(".elem_container :last-child").html());
+			console.log($(".elem_container").last().html());
 			// $('.elem_container').last().remove();
 			// $('.code').last().remove();
 		}
@@ -108,6 +114,9 @@
 		$(".elem_container").empty();
 	});
 
+	$(".btn").mouseup(function(){
+    	$(this).blur();
+	})
 
 var recognizeShape = function () {
 		var all_strokes = sketch.getStrokes();

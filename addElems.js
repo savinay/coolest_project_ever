@@ -111,7 +111,15 @@ var addNavbar = function (w, h, left, top) {
 	addCode(top, code);
 }
 
+// var addCode = function (top,code) {
+// 	var codeDiv = $("#code");
+// 	codeDiv.append("<pre " + posCode(top) + "><code>" + code + "</code></pre>")
+// }
+
 var addCode = function (top,code) {
-	var elements = $("#code");
-	elements.append("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
+	var codeDiv = $("#code");
+	codeDiv.append("<pre style='font-size: 200%;' " + posCode(top) + "><code>" + code + "</code></pre>")
+	console.log(codeDiv.last().html());
+	// fadeOut();
+	// $("#code").last().fadeIn();
 }
