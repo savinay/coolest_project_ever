@@ -8,7 +8,7 @@ function pos(left, top, w, h){
 }
 
 function posCode(top){
-	var position = ' style=" position:absolute; top:' + top + '" ';
+	var position = ' style="font-size:100%; position:absolute; top:' + top + '" ';
 	return position;
 }
 
@@ -117,9 +117,6 @@ var addNavbar = function (w, h, left, top) {
 // }
 
 var addCode = function (top,code) {
-	var codeDiv = $("#code");
-	codeDiv.append("<pre style='font-size: 200%;' " + posCode(top) + "><code>" + code + "</code></pre>")
-	console.log(codeDiv.last().html());
-	// fadeOut();
-	// $("#code").last().fadeIn();
+	var elements = $("#code");
+	elements.html("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
 }

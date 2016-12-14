@@ -32,35 +32,40 @@
 	
 
 	<body>
-		<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
-		<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
-		<button type="button" id="reset" class="btn btn-primary">Reset</button>
-		<!--All elements get inserted in this-->
-		<div class="elem_container"></div>
+
 		
-		<div id="code" style="position: absolute; width: 300px; border: 4px solid #73AD21; height: 100%; width: 30%; top: 0px; right: 0px;"></div>
-		<div id="includedContent"></div>
-		
-		
-		
-		<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
-			<h3>[CVA, CVP, ERA, ERP]</h3>
-			<ul id="elementlist">
-				<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
-				<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
-				<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
-				<li id="line">Line...........[<span>0 0 0 0</span>]</li>
-			</ul>
-			<center style="font-family: 'Montserrat', sans-serif;">I think its a
-							<span id="prediction">...nothing yet.</span></center>
+
+		<div style="overflow-y: auto;">
+			<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
+			<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
+			<button type="button" id="reset" class="btn btn-primary">Reset</button>
+			
+			<div id="code" style="width: 500px; float: right;"></div>
+			
+			<!--All Objects get inserted inserted after this-->
+			<div class="elem_container"></div>
+			
+			<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
+				<h3>[CVA, CVP, ERA, ERP]</h3>
+				<ul id="elementlist">
+					<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
+					<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
+					<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
+					<li id="line">Line...........[<span>0 0 0 0</span>]</li>
+				</ul>
+				<center style="font-family: 'Montserrat', sans-serif;">I think its a
+								<span id="prediction">...nothing yet.</span></center>
+			</div>
+
 		</div>
+		
 	</body>
 
 
 
 <script type="text/paperscript" canvas="canvas">
     // $(document).ready(function(){
-      $("#includedContent").load("b.html");
+      //$("#includedContent").load("b.html");
     // });
 
 	// GLOBAL for jquery to know where to insert the elements
@@ -88,6 +93,7 @@
 
 	// use keyboard shortcuts
 	$(document).on("keypress", function (e) {
+
 		if (e.which == 97) // 'a' pressed
 			recognizeShape();
 		else if (e.which == 114) // 'r' pressed
