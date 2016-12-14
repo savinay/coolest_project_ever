@@ -153,8 +153,13 @@
 					}
 					else if (inner_shape == "rectangle")
 						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
-					else if (inner_shape == "line")
+					else if (inner_shape == "line") {
+						// getEndPointsOfLine();
+						
 						addButton(width, height, startPoint_x_outer, startPoint_y_outer);
+						addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
+					}
+						
 					else if (inner_shape == "circle")
 						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
 					

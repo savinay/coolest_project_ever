@@ -68,3 +68,7 @@ var addRadioButton = function (w, h, left, top) {
 					+ pos(left, top, w, h) + ">Lorem Ipsum")
 	
 }
+
+var addNavbar = function (w, h, left, top) {
+	console.log("adding navbar");
+}
