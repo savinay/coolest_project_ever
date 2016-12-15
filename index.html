@@ -5,9 +5,6 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 		<!--For using jquery!-->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-		  <!--integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="-->
-		  <!--crossorigin="anonymous"></script>-->
-		<!-- An AMD-loader like RequireJS is necessary for srlib's asynchronous modules -->
 		<script src="js/require.js"></script>
 		<!-- Load srlib following RequireJS -->
 		<script src="js/srlib.js"></script>	
@@ -71,7 +68,7 @@
 	// GLOBAL for jquery to know where to insert the elements
 	var elements=$(".elem_container");
 	// GLOBAL that keeps track of the state of the recognizerButton
-	var recognizerOn = false;
+	var recognizerOn = true;
 	// GLOBAL variables for detecting start and end points of a line
 	var startPoint;
 	var EndPoint;
@@ -94,10 +91,12 @@
 	// use keyboard shortcuts
 	$(document).on("keypress", function (e) {
 
-		if (e.which == 97) // 'a' pressed
+		if (e.which == 114) // 'r' pressed
 			recognizeShape();
-		else if (e.which == 114) // 'r' pressed
+		else if (e.which == 99){ // 'c' pressed
 			$(".elem_container").empty();
+			$("#code").empty();
+		}
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
 		else if (e.which == 113){ // 'q' pressed
@@ -250,7 +249,6 @@ var recognizeShape = function () {
 			for (var key in all_strokes)
 				combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
 		}
-		
 	}
 </script>	
 	

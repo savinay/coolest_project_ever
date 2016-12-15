@@ -8,7 +8,7 @@ function pos(left, top, w, h){
 }
 
 function posCode(top){
-	var position = ' style="font-size:100%; position:absolute; top:' + top + '" ';
+	var position = ' style="font-size:80%; position:absolute; top:' + top + '" ';
 	return position;
 }
 
@@ -45,7 +45,7 @@ var addDropdown = function(w, h, left, top){
 
 var addButton = function(w, h, left, top){
 	var elements=$(".elem_container");
-	var defaultImg = "http://www.downloadclipart.net/large/11034-small-button-design.png";
+	var defaultImg = "http://www.clipartkid.com/images/536/blue-3d-rectangle-9TskkS-clipart.png";
 	var id = " id=button_placeholder ";
 	elements.append("<img src="
 					+ defaultImg
