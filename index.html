@@ -36,6 +36,7 @@
 			<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
 			<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
 			<button type="button" id="reset" class="btn btn-primary">Reset</button>
+			<button type="button" id="download" class="btn btn-primary">Download</button>
 			
 			<div id="code" style="width: 500px; float: right;"></div>
 			
@@ -118,6 +119,30 @@
 	$("#reset").click(function() {
 		$(".elem_container").empty();
 	});
+
+	$("#download").click(function(code) {
+		var head = $("head").html();
+		head = "<head>" + head + "</head><body>";
+		var body = $(".elem_container").html();
+		var tail = "</body>";
+		var code = head + body + tail;
+		console.log(code);
+		download("myFreeStyle.html", code);
+	});
+
+
+	function download(filename, text) {
+	  var element = document.createElement('a');
+	  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	  element.setAttribute('download', filename);
+	
+	  element.style.display = 'none';
+	  document.body.appendChild(element);
+	
+	  element.click();
+	
+	  document.body.removeChild(element);
+	}
 
 	$(".btn").mouseup(function(){
     	$(this).blur();
