@@ -100,13 +100,14 @@
 		}
 		else if (e.which == 116) // 't' pressed
 			toggleRecognizer();
-		else if (e.which == 113){ // 'q' pressed
-			// $(".elem_container last-child").remove()
-			console.log($(".elem_container").last().html());
-			// $('.elem_container').last().remove();
-			// $('.code').last().remove();
-		}
 	});
+	// backspaces can't be caught with keypress
+	$(document).keyup( function(e){
+	if (e.keyCode == 8){ // backspace pressed
+		$(".elem_container > :last").remove();
+		$("#code > :last").remove();
+	}
+	}); 
 
 	$("#recognitionOnButton").click(function(){
 		toggleRecognizer();

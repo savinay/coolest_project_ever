@@ -1,16 +1,5 @@
 /*global $*/
 
 	
-$("#recognitionOnButton").click(function(){
-	toggleRecognizer();
-});
-
-$("#recognizeFigure").click(function() {
-	recognizeShape();	
-});
-
-$("#reset").click(function() {
-	resetAll();
-});
-
+// would like to add controls here like recognize button... etc
 

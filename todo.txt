@@ -1,0 +1,13 @@
+Recognizer On/Off
+backspace feature
+hide control buttons
+sytax highlighting on code
+
+
+increase recognition
+
+pic shouldn't fade
+put frame around webpage
+add arrow for htmll code
+downloadable html page
+snap/drag/resize options
