@@ -5,7 +5,7 @@ function distance(x1, x2, y1, y2) {
 
 
 var getExtremes = function(stroke){
-	console.log("strokes: ", stroke);
+	if (stroke.length == 0) return;
 	var minx = Number.MAX_VALUE; var maxx = Number.MIN_VALUE;
 	var miny = Number.MAX_VALUE; var maxy = Number.MIN_VALUE;
 	for (var i=0; i<stroke.length; i++){
@@ -45,7 +45,7 @@ var range = function(sketch){
 	return {"x":xrange, "y":yrange};
 }
 
-var getEndPointsOfLine = function (points) {
+var getSlope = function (points) {
 	var rise = Math.abs(points[points.length - 1].y-points[0].y);
 	var run = Math.abs(points[points.length - 1].x-points[0].x);
 	var slope = Math.atan(rise/run);

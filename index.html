@@ -1,283 +1,355 @@
 <html>
-	<head>
-		<title>PaperJS - Starter Canvas</title>
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-		<!--For using jquery!-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-		<script src="js/require.js"></script>
-		<!-- Load srlib following RequireJS -->
-		<script src="js/srlib.js"></script>	
-		<!--Paper JS-->
-		<script src="js/paper-full.js"></script>
-		<!--cool font-->
-		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-		<!--Fonts and styling -- needed?-->
-		<link href="css/style.css" rel='stylesheet' type='text/css'/>
-		<!--this is the styling for the elements added to the screen-->
-		<link rel="stylesheet" type="text/css" href="style.css">
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-		
-		<script type="text/javascript" src="clickAction.js"></script>
-		<script type="text/javascript" src="addElems.js"></script>
-		<script type="text/javascript" src="geometry.js"></script>
-		<script type="text/javascript" src="controls.js"></script>
-		<script type="text/javascript" src="recognizer.js"></script>
-		<!--include html for sidebar-->
-		<!--<link rel="import" href="sidebar.html">-->
-	</head>
+<head>
+	<title>PaperJS - Starter Canvas</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!--For using jquery!-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="js/require.js"></script>
+	<!-- Load srlib following RequireJS -->
+	<script src="js/srlib.js"></script>	
+	<!--Paper JS-->
+	<script src="js/paper-full.js"></script>
+	<!--cool font-->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+	<!--Fonts and styling -- needed?-->
+	<link href="css/style.css" rel='stylesheet' type='text/css'/>
+	<!--this is the styling for the elements added to the screen-->
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	
+	<script type="text/javascript" src="clickAction.js"></script>
+	<script type="text/javascript" src="addElems.js"></script>
+	<script type="text/javascript" src="geometry.js"></script>
+	<script type="text/javascript" src="controls.js"></script>
+	<script type="text/javascript" src="recognizer.js"></script>
 
-	<body>
+	<!--Apperently this is needed for highlighting the code-->
+	<!--<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/go.min.js"></script>-->
+	<!--<script>hljs.initHighlightingOnLoad();</script>-->
 
-		
+</head>
 
-		<div style="overflow-y: auto;">
-			<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
-			<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
-			<button type="button" id="reset" class="btn btn-primary">Reset</button>
-			<button type="button" id="download" class="btn btn-primary">Download</button>
-			
-			<div id="code" style="width: 500px; float: right;"></div>
-			
-			<!--All Objects get inserted inserted after this-->
-			<div class="elem_container"></div>
-			
-			<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
-				<h3>[CVA, CVP, ERA, ERP]</h3>
-				<ul id="elementlist">
-					<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
-					<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
-					<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
-					<li id="line">Line...........[<span>0 0 0 0</span>]</li>
-				</ul>
-				<center style="font-family: 'Montserrat', sans-serif;">I think its a
-								<span id="prediction">...nothing yet.</span></center>
-			</div>
 
-		</div>
-		
-	</body>
+<body style="overflow-y: auto;">
+	<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
+	<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
+	<button type="button" id="reset" class="btn btn-primary">Reset</button>
+	<button type="button" id="download" class="btn btn-primary">Download</button>
+	
+	
+	<!--The html code for all identified elements here-->
+	<div class="elem_container"></div>
+	<!--The text representation of the html code is shown on the side of the screen 
+	and stored here..... could just use the code above if could write a function to convert it-->
+	<div class="code_container" style="width: 500px; float: right;"></div>
+	
+	<!--for recognizer learning algorithm.. not being used but must exist for now-->
+	<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
+		<h3>[CVA, CVP, ERA, ERP]</h3>
+		<ul id="elementlist">
+			<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
+			<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
+			<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
+			<li id="line">Line...........[<span>0 0 0 0</span>]</li>
+		</ul>
+		<center style="font-family: 'Montserrat', sans-serif;">I think its a
+						<span id="prediction">...nothing yet.</span></center>
+	</div>
+</body>
 
 
 
 <script type="text/paperscript" canvas="canvas">
-    // $(document).ready(function(){
-      //$("#includedContent").load("b.html");
-    // });
+// GLOBAL for jquery to know where to insert the elements
+var elements=$(".elem_container");
+// GLOBAL that keeps track of the state of the recognizerButton
+var recognizerOn = true;
+// GLOBAL keeps track of current number of buttonDownPresses
+var countMouseDown = 0;
+// other globals for shape recognizer
+var combined_stroke = {};
+combined_stroke["outer_shape"] = [];
+combined_stroke["inner_shape"] = []; 
 
-	// GLOBAL for jquery to know where to insert the elements
-	var elements=$(".elem_container");
-	// GLOBAL that keeps track of the state of the recognizerButton
-	var recognizerOn = true;
-	// GLOBAL variables for detecting start and end points of a line
-	var startPoint;
-	var EndPoint;
-	// GLOBAL keeps track of current number of buttonDownPresses
-	var countMouseDown = 0;
-	// other globals that need commenting
-	var combined_stroke = {};
-	combined_stroke["outer_shape"] = [];
-	combined_stroke["inner_shape"] = []; 
 
-	function toggleRecognizer() {
-		if (recognizerOn)
-			newstate = "OFF";
-		else
-			newstate = "ON";
-		$("#recognitionOnButton").text("Turn Recognizer " + newstate);
-		recognizerOn = !recognizerOn;
+/*............ code to use keyboard shortcuts ............*/
+$(document).on("keypress", function (e) {
+	if (e.which == 114) // 'r' pressed
+		recognizeComplex();
+	else if (e.which == 99){ // 'c' pressed
+		$(".elem_container").empty();
+		$(".code_container").empty();
 	}
-
-	// use keyboard shortcuts
-	$(document).on("keypress", function (e) {
-
-		if (e.which == 114) // 'r' pressed
-			recognizeShape();
-		else if (e.which == 99){ // 'c' pressed
-			$(".elem_container").empty();
-			$("#code").empty();
-		}
-		else if (e.which == 116) // 't' pressed
-			toggleRecognizer();
-	});
-	// backspaces can't be caught with keypress
-	$(document).keyup( function(e){
+	else if (e.which == 116) // 't' pressed
+		toggleRecognizer();
+});
+// backspaces can't be caught with keypress
+$(document).keyup( function(e){
 	if (e.keyCode == 8){ // backspace pressed
 		$(".elem_container > :last").remove();
-		$("#code > :last").remove();
+		$(".code_container > :last").remove();
 	}
-	}); 
+}); 
 
-	$("#recognitionOnButton").click(function(){
-		toggleRecognizer();
-	});
+
+/*............ js for button presses ............*/
+// for letting the user choose between annotation and elemtent inserstion
+function toggleRecognizer() {
+	if (recognizerOn)
+		newstate = "OFF";
+	else
+		newstate = "ON";
+	$("#recognitionOnButton").text("Turn Recognizer " + newstate);
+	recognizerOn = !recognizerOn;
+}
+
+function download(filename, text) {
+	var head = $("head").html();
+	head = "<head>" + head + "</head><body>";
+	var body = $(".elem_container").html();
+	var tail = "</body>";
+	var code = head + body + tail;
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
 	
-	$("#recognizeFigure").click(function() {
-		recognizeShape();	
-	});
-	
-	$("#reset").click(function() {
-		$(".elem_container").empty();
-	});
-
-	$("#download").click(function(code) {
-		var head = $("head").html();
-		head = "<head>" + head + "</head><body>";
-		var body = $(".elem_container").html();
-		var tail = "</body>";
-		var code = head + body + tail;
-		console.log(code);
-		download("myFreeStyle.html", code);
-	});
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
 
 
-	function download(filename, text) {
-	  var element = document.createElement('a');
-	  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	  element.setAttribute('download', filename);
-	
-	  element.style.display = 'none';
-	  document.body.appendChild(element);
-	  element.click();
-	  document.body.removeChild(element);
+/*............ jquerry for button presses ............*/
+$("#recognitionOnButton").click(function(){ toggleRecognizer() });
+
+$("#recognizeFigure").click(function() { recognizeComplex() });
+
+$("#reset").click(function() { $(".elem_container").empty() });
+
+$("#download").click(function(code) { download("myFreeStyle.html", code) });
+
+// show bootstrap buttons as depressed when mouseup
+$(".btn").mouseup(function(){ $(this).blur(); })
+
+
+// returns object with data about bouding box (different than the convex hull)
+// inlc. extremes, midpoint, width, height, area
+function bounding(stroke){
+	BB = new Object();
+	BB.extremes = getExtremes(stroke); // returns object with max/min x/y
+	BB.midpoint = (BB.extremes.max_x + BB.extremes.min_x)/2;
+	BB.width = BB.extremes.max_x - BB.extremes.min_x;
+	BB.height = BB.extremes.max_y - BB.extremes.min_y;
+	// fatness: 1 is square, < 1 is narrow/fat, > 1 is tall
+	BB.fatness = BB.width / BB.height;
+	BB.area = BB.width * BB.height;
+	return BB;
+}
+
+// returns an object with data about the shape including...
+// shape (string), startPoint, and bounding box
+// returns null if stroke is empty
+function getSpecs(stroke){
+	if (stroke.length == 0) return;
+	var object = new Object();
+	object.shape = recognize(stroke);
+	object.startx = stroke[0].getX();
+	object.starty = stroke[0].getY();
+	object.BB = bounding(stroke);
+	return object;
+}
+
+// gives how far right the inner object is right of the left side of the outer
+// returns a decimal (0-1 if inside the outer)
+// .5 represents the middle
+function posRight(inner, outer){
+	return ((inner.BB.midpoint - outer.BB.extremes.min_x) / outer.BB.width);
+}
+
+function identifyElement(inner, outer){
+	if (outer.shape == "unknown" || (inner && inner.shape == "unknown")){
+		return "unkown";
 	}
-
-	$(".btn").mouseup(function(){
-    	$(this).blur();
-	})
-
-var recognizeShape = function () {
-		var all_strokes = sketch.getStrokes();
-		console.log(combined_stroke);
-		path.removeSegments();
-		endPoint = event.point;
-		console.log(combined_stroke["outer_shape"]);
-		var shape = recognize(combined_stroke["outer_shape"]); //stroke.getPoints() 
-		console.log("stroke: ", stroke);
-		console.log("outer_shape: ", shape);
-		startPoint_x_outer -= 5;
-		startPoint_y_outer += 25;
-		if (shape == "rectangle"){
-			var coordinates = getExtremes(combined_stroke["outer_shape"]);
-			var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
-			var width = coordinates.max_x - coordinates.min_x;
-			var height = coordinates.max_y - coordinates.min_y;
-			var area = (coordinates.max_x - coordinates.min_x) * (coordinates.max_y - coordinates.min_y);
-			if (area > 2000) {
-				if (combined_stroke["inner_shape"].length > 0) {
-					var inner_shape = recognize(combined_stroke["inner_shape"]);
-					var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
-					var mid_point = (coordinates.max_x + coordinates.min_x)/2;
-					console.log(inner_shape);
-					if (inner_shape == "triangle") {
-						var coordinates_inner_shape = getExtremes(combined_stroke["inner_shape"]);
-						var mid_point = (coordinates.max_x + coordinates.min_x)/2;
-						console.log("inner_shape: ", mid_point, coordinates_inner_shape.max_x, coordinates_inner_shape.min_x);
-						if (coordinates_inner_shape.max_x < mid_point * 1.1 && coordinates_inner_shape.min_x > mid_point * 0.9)
-							addVideo(width, height, startPoint_x_outer, startPoint_y_outer);
-						else if (coordinates_inner_shape.max_x > mid_point * 1.1)
-							addDropdown(width, height, startPoint_x_outer, startPoint_y_outer);
+	
+	// if outer shape with no inner shape, then identify as radio button
+	// radio button size is constant (so put 1, 1 for width and height)
+	if ((outer.shape == "rectangle" || outer.shape == "circle") 
+		&& outer.BB.area < 400 && !inner) {
+		return "radioButton";
+	}
+	if (outer.shape == "rectangle"){
+		// if it is a rectangle with no inner shape, it is a text box
+		if (!inner){
+			return "textArea";
+		}
+		// identify elements that have a rectangle as out shape and something inside them
+		else {
+			var rel_pos = posRight(inner, outer);
+			// if its a small outer rectangle with something inside, it is a check box
+			if (outer.BB.area < 500)
+				return "checkBox";
+			else {
+				if (inner.shape == "triangle") {
+					// if the triangle is near the middle
+					if (rel_pos > .4 && rel_pos < .6){
+						return "video";
 					}
-					else if (inner_shape == "rectangle")
-						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
-					else if (inner_shape == "line") {
-						// getEndPointsOfLine();
-						var slope = getEndPointsOfLine(combined_stroke["inner_shape"]);
-						if (slope <= 0.1) 
-							addButton(width, height, startPoint_x_outer, startPoint_y_outer);
-						if (slope >= 0.9) 
-							addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
+					// if the triangle is near the side and the BB is fat
+					else if (rel_pos > .7 && outer.BB.fatness > 2.5){
+						// should be fixed height for now (40)
+						return "dropdown";
 					}
-						
-
-					else if ((inner_shape == "circle" || inner_shape == "rectangle") && coordinates_inner_shape.max_x > mid_point * 1.1 && (coordinates.max_y - coordinates.min_y)/(coordinates.max_x - coordinates.min_x) < 0.4 ) {
-
-						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
-					}
-					
-				} else
-					addTextArea(width, height, startPoint_x_outer, startPoint_y_outer);
-			} else {
-				addCheckBox(width, height, startPoint_x_outer, startPoint_y_outer);
+				}
+				else if ((inner.shape == "circle" || inner.shape == "rectangle")
+						&& rel_pos > .6               // if inner shape on the right hand side
+						&& outer.BB.fatness > 2.5 ) { // if the bounding box was drawn narrow
+					return "searchBar";
+				}
+				// crossed lines will be interpreted as a rectangle through the convex hull method
+				else if (inner.shape == "rectangle"){
+					return "image";
+				}
+				else if (inner.shape == "line") {
+					var slope = getSlope(combined_stroke["inner_shape"]);
+					if (slope <= 0.1) // horizontal line
+						return "button";
+					else if (slope >= 0.9) // verticle line
+						return "navbar";
+				}
 			}
 		}
-		
-		if (shape == "circle") {
-			addRadioButton(width, height, startPoint_x_outer, startPoint_y_outer);
-		}
-		paper.project.clear();
-		add_jquery();
-		countMouseDown = 0;
-		sketch = new srlib.core.data.container.Sketch();
-		path = new Path();
-		stroke = new srlib.core.data.container.Stroke();
-		point = new srlib.core.data.container.Point();
-		var all_strokes = [];
-		// combined_stroke = {};
-		combined_stroke["outer_shape"] = [];
-		combined_stroke["inner_shape"] = [];
 	}
+}
 
+function addElem(element, outer){
+	switch(element) {
+	    case "image":
+	        addfunc = addImage;
+			break;
+	    case "navBar":
+	        addfunc = addnavBar;
+			break;
+	    case "radioButton":
+	        addfunc = addradioButton;
+			break;
+	    case "video":
+	        addfunc = addVideo;
+	        break;
+	    case "textArea":
+	        addfunc = addTextArea;
+	        break;
+	    case "checkBox":
+	        addfunc = addcheckBox;
+	        break;
+	    case "textArea":
+	        addfunc = addTextArea;
+	        break;
+	    case "button":
+	        addfunc = addButton;
+	        break;
+	    case "dropdown":
+	        addfunc = addDropdown;
+	        break;
+	     default:
+	    	console.log("unidentified element.")
+	    	return;
+	}
+	addfunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty);
+}
+
+/*............ Complex Shape Recognizer ............*/
+var recognizeComplex = function () {
+	// not sure why need this
+	var all_strokes = sketch.getStrokes();
+	// clears the screen of all free hand sketches
+	path.removeSegments();
 	
+	// get specs on outer shape
+	var outer = getSpecs(combined_stroke["outer_shape"]);
+	// there needs to at least be an outer shape... if not then exit function
+	if (!outer) return;
+	// for some reason, need to adjust where the element is place
+	outer.startx -= 5; outer.starty += 25;
+	// get specs on inner shape
+	var inner = getSpecs(combined_stroke["inner_shape"]);
+	
+	var element = identifyElement(inner, outer);
+	addElem(element, outer);
+	
+	// would this be the same as path.remove?
+	paper.project.clear();
+	add_jquery();
+	countMouseDown = 0;
+	sketch = new srlib.core.data.container.Sketch();
+	path = new Path();
+	stroke = new srlib.core.data.container.Stroke();
+	point = new srlib.core.data.container.Point();
+	var all_strokes = [];
+	// combined_stroke = {};
+	combined_stroke["outer_shape"] = [];
+	combined_stroke["inner_shape"] = [];
+}
 
-	// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
-	function onMouseDown(event) {
-		// PaperJS add a new Path object and initial starting point
-		countMouseDown += 1;
-		
-		// start new path and set settings
-		path = new Path();
-		path.strokeColor = 'blue';
-		path.strokeWidth = 2;
-		path.add(event.point);
-		startPoint = event.point;
-		sketch = new srlib.core.data.container.Sketch();
-		
-		// SRLlib add a new Stroke object and initial starting point
-		stroke = new srlib.core.data.container.Stroke();
-		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-		if (countMouseDown==1) {
-			startPoint_x_outer = point.x;
-			startPoint_y_outer = point.y;
-		}
-		if (countMouseDown == 2) {
-			startPoint_x_inner = point.x;
-			startPoint_y_inner = point.y;
-		}
-		
-		sketch = new srlib.core.data.container.Sketch();
-		sketch.addStroke(stroke);
-		sketch.addPoint(point);
-		stroke.addPoint(point);
-	}
 
-	function onMouseDrag(event) {
-		// PaperJS add points to Path object on mouse drag
-		path.add(event.point);
-		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-		sketch.addPoint(point);
-		stroke.addPoint(point);
-	}
 
-	function onMouseUp(event) {
-		var all_strokes = sketch.getStrokes();
-		if(countMouseDown == 1) {
-			for (var key in all_strokes)
-				combined_stroke["outer_shape"] = combined_stroke["outer_shape"].concat(all_strokes[key].getPoints());
-		}
-		if (countMouseDown == 2) {
-			var coordinates = getExtremes(combined_stroke["outer_shape"]);
-			var inner_points = getInnerPoints(combined_stroke["outer_shape"], coordinates);
-			console.log(inner_points);
-			for (var key in all_strokes)
-				combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
-		}
+// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
+function onMouseDown(event) {
+	// PaperJS add a new Path object and initial starting point
+	countMouseDown += 1;
+	
+	// path is a Paper JS member
+	path = new Path();
+	path.strokeColor = 'blue';
+	path.strokeWidth = 2;
+	path.add(event.point);
+	// sketch is a SRLib member -- make a new one with mouse down
+	sketch = new srlib.core.data.container.Sketch();
+	stroke = new srlib.core.data.container.Stroke();
+	// starting point
+	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
+
+	if (countMouseDown==1) {
+		outer_startx = point.x;
+		outer_starty = point.y;
 	}
+	if (countMouseDown == 2) {
+		startPoint_x_inner = point.x;
+		starty_inner = point.y;
+	}
+	
+	sketch = new srlib.core.data.container.Sketch();
+	sketch.addStroke(stroke);
+	sketch.addPoint(point);
+	stroke.addPoint(point);
+}
+
+function onMouseDrag(event) {
+	// PaperJS add points to Path object on mouse drag
+	path.add(event.point);
+	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
+	sketch.addPoint(point);
+	stroke.addPoint(point);
+}
+
+function onMouseUp(event) {
+	var all_strokes = sketch.getStrokes();
+	if(countMouseDown == 1) {
+		for (var key in all_strokes)
+			combined_stroke["outer_shape"] = combined_stroke["outer_shape"].concat(all_strokes[key].getPoints());
+	}
+	if (countMouseDown == 2) {
+		var coordinates = getExtremes(combined_stroke["outer_shape"]);
+		for (var key in all_strokes)
+			combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
+	}
+	// if (time_since_last_click > 1000) recognizeShape();
+}
 </script>	
-	
+
 <canvas id="canvas" rezise="true"></canvas>
-	
-	
+
+
 </html>
 

@@ -111,12 +111,8 @@ var addNavbar = function (w, h, left, top) {
 	addCode(top, code);
 }
 
-// var addCode = function (top,code) {
-// 	var codeDiv = $("#code");
-// 	codeDiv.append("<pre " + posCode(top) + "><code>" + code + "</code></pre>")
-// }
-
+// used for inserting the showing the code on the screen
 var addCode = function (top,code) {
-	var elements = $("#code");
+	var elements = $(".code_container");
 	elements.html("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
 }

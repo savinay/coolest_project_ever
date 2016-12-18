@@ -110,8 +110,9 @@ function arclen(figure){
 
 function recognize(figure) {
     var n = figure.length;
+    if (n == 0) return;
     var arclength = arclen(figure);
-    var identified = "...oh I don't know."; // string of shape identified.
+    var identified = "unknown"; // string of shape identified.
     // If the distance between consecutive points is within 10 points
     //for (var i = 0; i < n-1; i++) {
     //	if (Distance(figure[i].x, figure[i].y, figure[i+1].x, figure[i+1].y) <= 10) {
@@ -146,10 +147,10 @@ function recognize(figure) {
     var sketch_unit = unit_vector(description);
     for (var i=0;i<sketch_unit.length;++i)
     	sketch_unit[i] = parseFloat(sketch_unit[i].toFixed(3));
-    console.log("Area of Convex Hull :" + sketch_unit[0] + "%");
-    console.log("Perimeter of Convex Hull :" + sketch_unit[1] + "%");
-    console.log("Area of Enclosing Rect :" + sketch_unit[2] + "%");
-    console.log("Perimeter Enclosing Rect :" + sketch_unit[3] + "%");
+    // console.log("Area of Convex Hull :" + sketch_unit[0] + "%");
+    // console.log("Perimeter of Convex Hull :" + sketch_unit[1] + "%");
+    // console.log("Area of Enclosing Rect :" + sketch_unit[2] + "%");
+    // console.log("Perimeter Enclosing Rect :" + sketch_unit[3] + "%");
     
     
     // Identifying a rectangle - WORKING

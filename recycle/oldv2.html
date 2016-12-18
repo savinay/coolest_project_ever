@@ -147,31 +147,31 @@
 						var mid_point = (coordinates.max_x + coordinates.min_x)/2;
 						console.log("inner_shape: ", mid_point, coordinates_inner_shape.max_x, coordinates_inner_shape.min_x);
 						if (coordinates_inner_shape.max_x < mid_point * 1.1 && coordinates_inner_shape.min_x > mid_point * 0.9)
-							addVideo(width, height, startPoint_x_outer, startPoint_y_outer);
+							addVideo(width, height, startPoint_x_outer, starty_outer);
 						else if (coordinates_inner_shape.max_x > mid_point * 1.1)
-							addDropdown(width, height, startPoint_x_outer, startPoint_y_outer);
+							addDropdown(width, height, startPoint_x_outer, starty_outer);
 					}
 					else if (inner_shape == "rectangle")
-						addImage(width, height, startPoint_x_outer, startPoint_y_outer);
+						addImage(width, height, startPoint_x_outer, starty_outer);
 					else if (inner_shape == "line") {
 						// getEndPointsOfLine();
 						
-						addButton(width, height, startPoint_x_outer, startPoint_y_outer);
-						addNavbar(width, height, startPoint_x_outer, startPoint_y_outer);
+						addButton(width, height, startPoint_x_outer, starty_outer);
+						addNavbar(width, height, startPoint_x_outer, starty_outer);
 					}
 						
 					else if (inner_shape == "circle")
-						addSearchBar(width, height, startPoint_x_outer, startPoint_y_outer);
+						addSearchBar(width, height, startPoint_x_outer, starty_outer);
 					
 				} else
-					addTextArea(width, height, startPoint_x_outer, startPoint_y_outer);
+					addTextArea(width, height, startPoint_x_outer, starty_outer);
 			} else {
-				addCheckBox(width, height, startPoint_x_outer, startPoint_y_outer);
+				addCheckBox(width, height, startPoint_x_outer, starty_outer);
 			}
 		}
 		
 		if (shape == "circle") {
-			addRadioButton(width, height, startPoint_x_outer, startPoint_y_outer);
+			addRadioButton(width, height, startPoint_x_outer, starty_outer);
 		}
 		paper.project.clear();
 		add_jquery();
@@ -249,11 +249,11 @@
 		point = new srlib.core.data.container.Point(event.point.x,event.point.y)
 		if (countMouseDown==1) {
 			startPoint_x_outer = point.x;
-			startPoint_y_outer = point.y;
+			starty_outer = point.y;
 		}
 		if (countMouseDown == 2) {
 			startPoint_x_inner = point.x;
-			startPoint_y_inner = point.y;
+			starty_inner = point.y;
 		}
 		
 		console.log(Math.abs(endtime-starttime));
