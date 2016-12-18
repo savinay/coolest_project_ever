@@ -75,8 +75,10 @@ combined_stroke["inner_shape"] = [];
 
 /*............ code to use keyboard shortcuts ............*/
 $(document).on("keypress", function (e) {
-	if (e.which == 114) // 'r' pressed
-		recognizeComplex();
+	if (e.which == 114){ // 'r' pressed
+		insertElement(combined_stroke);
+		resetGlobals();
+	}
 	else if (e.which == 99){ // 'c' pressed
 		$(".elem_container").empty();
 		$(".code_container").empty();
@@ -115,7 +117,7 @@ function download(filename, text) {
 	element.setAttribute('download', filename);
 	
 	element.style.display = 'none';
-	document.body.appendChild(element);
+	document.body.pushChild(element);
 	element.click();
 	document.body.removeChild(element);
 }
@@ -124,7 +126,10 @@ function download(filename, text) {
 /*............ jquerry for button presses ............*/
 $("#recognitionOnButton").click(function(){ toggleRecognizer() });
 
-$("#recognizeFigure").click(function() { recognizeComplex() });
+$("#recognizeFigure").click(function() {
+	insertElement(combined_stroke);
+	resetGlobals();
+});
 
 $("#reset").click(function() { $(".elem_container").empty() });
 
@@ -134,89 +139,47 @@ $("#download").click(function(code) { download("myFreeStyle.html", code) });
 $(".btn").mouseup(function(){ $(this).blur(); })
 
 
-/*............ Complex Shape Recognizer ............*/
-var recognizeComplex = function () {
-	// clears the screen of all free hand sketches
-	path.removeSegments();
-	
-	// get specs on outer shape
-	var outer = getSpecs(combined_stroke["outer_shape"]);
-	// there needs to at least be an outer shape... if not then exit function
-	if (!outer) return;
-	// for some reason, need to adjust where the element is place
-	outer.startx -= 5; outer.starty += 25;
-	// get specs on inner shape
-	var inner = getSpecs(combined_stroke["inner_shape"]);
-	
-	// returns a function based whatever element was identified
-	var addFunc = identifyElement(inner, outer);
-	addFunc ? 
-		addFunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty) :
-		console.log("Unknown Element.");
-
-	// would this be the same as path.remove?
-	paper.project.clear();
-	add_jquery();
+/*......... Clean Up After Insertion .........*/
+function resetGlobals(){
 	countMouseDown = 0;
-	sketch = new srlib.core.data.container.Sketch();
-	path = new Path();
-	stroke = new srlib.core.data.container.Stroke();
-	point = new srlib.core.data.container.Point();
+	var combined_stroke = {};
 	combined_stroke["outer_shape"] = [];
-	combined_stroke["inner_shape"] = [];
-}
-
-
+	combined_stroke["inner_shape"] = []; 
+	paper.project.clear();
+	path = new Path();
+}	
 
 // ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
 function onMouseDown(event) {
 	// PaperJS add a new Path object and initial starting point
 	countMouseDown += 1;
 	
-	// path is a Paper JS member
+	// path is the freehand path you draw.. a paper JS object
 	path = new Path();
-	path.strokeColor = 'blue';
+	path.strokeColor = 'gray';
 	path.strokeWidth = 2;
 	path.add(event.point);
-	// sketch is a SRLib member -- make a new one with mouse down
-	sketch = new srlib.core.data.container.Sketch();
-	stroke = new srlib.core.data.container.Stroke();
-	// starting point
-	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-
-	if (countMouseDown==1) {
-		outer_startx = point.x;
-		outer_starty = point.y;
-	}
-	if (countMouseDown == 2) {
-		startPoint_x_inner = point.x;
-		starty_inner = point.y;
-	}
 	
-	sketch = new srlib.core.data.container.Sketch();
-	sketch.addStroke(stroke);
-	sketch.addPoint(point);
-	stroke.addPoint(point);
+	// starting point
+	stroke = [];
+	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
+	stroke.push(point);
 }
 
 function onMouseDrag(event) {
-	// PaperJS add points to Path object on mouse drag
 	path.add(event.point);
 	point = new srlib.core.data.container.Point(event.point.x,event.point.y)
-	sketch.addPoint(point);
-	stroke.addPoint(point);
+	stroke.push(point);
 }
 
 function onMouseUp(event) {
-	var all_strokes = sketch.getStrokes();
 	if(countMouseDown == 1) {
-		for (var key in all_strokes)
-			combined_stroke["outer_shape"] = combined_stroke["outer_shape"].concat(all_strokes[key].getPoints());
+		combined_stroke["outer_shape"] = stroke;
 	}
 	if (countMouseDown == 2) {
-		var coordinates = getExtremes(combined_stroke["outer_shape"]);
-		for (var key in all_strokes)
-			combined_stroke["inner_shape"] = combined_stroke["inner_shape"].concat(all_strokes[key].getPoints());
+		combined_stroke["inner_shape"] = stroke;
+		insertElement(combined_stroke);
+		resetGlobals();
 	}
 	// if (time_since_last_click > 1000) recognizeShape();
 }

@@ -1,5 +1,3 @@
-
-
 // returns object with data about bouding box (different than the convex hull)
 // inlc. extremes, midpoint, width, height, area
 function bounding(stroke){
@@ -17,8 +15,8 @@ function bounding(stroke){
 // returns an object with data about the shape including...
 // shape (string), startPoint, and bounding box
 // returns null if stroke is empty
-function getSpecs(stroke){
-	if (stroke.length == 0) return;
+function getShape(stroke){
+	if (!stroke || stroke.length == 0) return;
 	var object = new Object();
 	object.shape = recognize(stroke);
 	if (object.shape == "line"){
@@ -86,4 +84,25 @@ function identifyElement(inner, outer){
 			}
 		}
 	}
+}
+
+/*............ Element Insertion ............*/
+function insertElement(combined_stroke) {
+	// returns specs that represent data about outer shape
+	var outer = getShape(combined_stroke["outer_shape"]);
+	// there needs to at least be an out["r shape... "]if not then exit function
+	if (!outer) return;
+	// need to adjust or else elem will jump when replaced
+	outer.startx -= 5; outer.starty += 25;
+	// returns specs that represent data about inner shape
+	var inner = getShape(combined_stroke["inner_shape"]);
+	// returns a function based whatever element was identified
+	var addFunc = identifyElement(inner, outer);
+	addFunc ? 
+		addFunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty) :
+		console.log("Unknown Element.");
+	
+	// add jquery functions to new elements
+	add_jquery();
+	// canvas and global arrays cleanup
 }
