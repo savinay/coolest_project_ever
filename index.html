@@ -23,7 +23,7 @@
 	<script type="text/javascript" src="geometry.js"></script>
 	<script type="text/javascript" src="controls.js"></script>
 	<script type="text/javascript" src="recognizer.js"></script>
-
+	<script type="text/javascript" src="complexIdentifier.js"></script>
 	<!--Apperently this is needed for highlighting the code-->
 	<!--<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/go.min.js"></script>-->
 	<!--<script>hljs.initHighlightingOnLoad();</script>-->
@@ -134,135 +134,8 @@ $("#download").click(function(code) { download("myFreeStyle.html", code) });
 $(".btn").mouseup(function(){ $(this).blur(); })
 
 
-// returns object with data about bouding box (different than the convex hull)
-// inlc. extremes, midpoint, width, height, area
-function bounding(stroke){
-	BB = new Object();
-	BB.extremes = getExtremes(stroke); // returns object with max/min x/y
-	BB.midpoint = (BB.extremes.max_x + BB.extremes.min_x)/2;
-	BB.width = BB.extremes.max_x - BB.extremes.min_x;
-	BB.height = BB.extremes.max_y - BB.extremes.min_y;
-	// fatness: 1 is square, < 1 is narrow/fat, > 1 is tall
-	BB.fatness = BB.width / BB.height;
-	BB.area = BB.width * BB.height;
-	return BB;
-}
-
-// returns an object with data about the shape including...
-// shape (string), startPoint, and bounding box
-// returns null if stroke is empty
-function getSpecs(stroke){
-	if (stroke.length == 0) return;
-	var object = new Object();
-	object.shape = recognize(stroke);
-	object.startx = stroke[0].getX();
-	object.starty = stroke[0].getY();
-	object.BB = bounding(stroke);
-	return object;
-}
-
-// gives how far right the inner object is right of the left side of the outer
-// returns a decimal (0-1 if inside the outer)
-// .5 represents the middle
-function posRight(inner, outer){
-	return ((inner.BB.midpoint - outer.BB.extremes.min_x) / outer.BB.width);
-}
-
-function identifyElement(inner, outer){
-	if (outer.shape == "unknown" || (inner && inner.shape == "unknown")){
-		return "unkown";
-	}
-	
-	// if outer shape with no inner shape, then identify as radio button
-	// radio button size is constant (so put 1, 1 for width and height)
-	if ((outer.shape == "rectangle" || outer.shape == "circle") 
-		&& outer.BB.area < 400 && !inner) {
-		return "radioButton";
-	}
-	if (outer.shape == "rectangle"){
-		// if it is a rectangle with no inner shape, it is a text box
-		if (!inner){
-			return "textArea";
-		}
-		// identify elements that have a rectangle as out shape and something inside them
-		else {
-			var rel_pos = posRight(inner, outer);
-			// if its a small outer rectangle with something inside, it is a check box
-			if (outer.BB.area < 500)
-				return "checkBox";
-			else {
-				if (inner.shape == "triangle") {
-					// if the triangle is near the middle
-					if (rel_pos > .4 && rel_pos < .6){
-						return "video";
-					}
-					// if the triangle is near the side and the BB is fat
-					else if (rel_pos > .7 && outer.BB.fatness > 2.5){
-						// should be fixed height for now (40)
-						return "dropdown";
-					}
-				}
-				else if ((inner.shape == "circle" || inner.shape == "rectangle")
-						&& rel_pos > .6               // if inner shape on the right hand side
-						&& outer.BB.fatness > 2.5 ) { // if the bounding box was drawn narrow
-					return "searchBar";
-				}
-				// crossed lines will be interpreted as a rectangle through the convex hull method
-				else if (inner.shape == "rectangle"){
-					return "image";
-				}
-				else if (inner.shape == "line") {
-					var slope = getSlope(combined_stroke["inner_shape"]);
-					if (slope <= 0.1) // horizontal line
-						return "button";
-					else if (slope >= 0.9) // verticle line
-						return "navbar";
-				}
-			}
-		}
-	}
-}
-
-function addElem(element, outer){
-	switch(element) {
-	    case "image":
-	        addfunc = addImage;
-			break;
-	    case "navBar":
-	        addfunc = addnavBar;
-			break;
-	    case "radioButton":
-	        addfunc = addradioButton;
-			break;
-	    case "video":
-	        addfunc = addVideo;
-	        break;
-	    case "textArea":
-	        addfunc = addTextArea;
-	        break;
-	    case "checkBox":
-	        addfunc = addcheckBox;
-	        break;
-	    case "textArea":
-	        addfunc = addTextArea;
-	        break;
-	    case "button":
-	        addfunc = addButton;
-	        break;
-	    case "dropdown":
-	        addfunc = addDropdown;
-	        break;
-	     default:
-	    	console.log("unidentified element.")
-	    	return;
-	}
-	addfunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty);
-}
-
 /*............ Complex Shape Recognizer ............*/
 var recognizeComplex = function () {
-	// not sure why need this
-	var all_strokes = sketch.getStrokes();
 	// clears the screen of all free hand sketches
 	path.removeSegments();
 	
@@ -275,9 +148,12 @@ var recognizeComplex = function () {
 	// get specs on inner shape
 	var inner = getSpecs(combined_stroke["inner_shape"]);
 	
-	var element = identifyElement(inner, outer);
-	addElem(element, outer);
-	
+	// returns a function based whatever element was identified
+	var addFunc = identifyElement(inner, outer);
+	addFunc ? 
+		addFunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty) :
+		console.log("Unknown Element.");
+
 	// would this be the same as path.remove?
 	paper.project.clear();
 	add_jquery();
@@ -286,8 +162,6 @@ var recognizeComplex = function () {
 	path = new Path();
 	stroke = new srlib.core.data.container.Stroke();
 	point = new srlib.core.data.container.Point();
-	var all_strokes = [];
-	// combined_stroke = {};
 	combined_stroke["outer_shape"] = [];
 	combined_stroke["inner_shape"] = [];
 }
