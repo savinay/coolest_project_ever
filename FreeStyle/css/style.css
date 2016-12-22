@@ -17,3 +17,8 @@ img {
 #code {
 	/*border-radius: 10px;*/
 }
+
+/* When users circle an element, it gets selected */
+.selected {
+	box-shadow: 10px 10px grey;
+}

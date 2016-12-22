@@ -16,6 +16,11 @@ function identifyElement(inner, outer){
 		&& outer.BB.area < 400 && !inner) {
 		return addRadioButton;
 	}
+
+	if (outer.shape == "circle" && outer.BB.area > 800 && !inner) {
+		editElem(outer.BB);
+		return addDummy;
+	}
 	
 	if (outer.shape == "squigly"){
 		deleteElem(outer.BB.midpoint);
