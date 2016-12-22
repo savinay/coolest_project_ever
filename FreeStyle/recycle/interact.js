@@ -2117,7 +2117,7 @@ Interaction.signals.on('action-start', function (_ref) {
 
   gestureEvent.ds = 0;
 
-  interaction.gesture.startDistance = interaction.gesture.prevDistance = gestureEvent.distance;
+  interaction.gesture.startdistance = interaction.gesture.prevdistance = gestureEvent.distance;
   interaction.gesture.startAngle = interaction.gesture.prevAngle = gestureEvent.angle;
   interaction.gesture.scale = 1;
 
@@ -2142,7 +2142,7 @@ Interaction.signals.on('action-move', function (_ref2) {
   interaction.target.fire(gestureEvent);
 
   interaction.gesture.prevAngle = gestureEvent.angle;
-  interaction.gesture.prevDistance = gestureEvent.distance;
+  interaction.gesture.prevdistance = gestureEvent.distance;
 
   if (gestureEvent.scale !== Infinity && gestureEvent.scale !== null && gestureEvent.scale !== undefined && !isNaN(gestureEvent.scale)) {
 
@@ -2234,7 +2234,7 @@ InteractEvent.signals.on('set-delta', function (_ref4) {
   iEvent.touches = [pointers[0], pointers[1]];
 
   if (starting) {
-    iEvent.distance = utils.touchDistance(pointers, deltaSource);
+    iEvent.distance = utils.touchdistance(pointers, deltaSource);
     iEvent.box = utils.touchBBox(pointers);
     iEvent.scale = 1;
     iEvent.ds = 0;
@@ -2248,9 +2248,9 @@ InteractEvent.signals.on('set-delta', function (_ref4) {
     iEvent.angle = interaction.prevEvent.angle;
     iEvent.da = iEvent.angle - interaction.gesture.startAngle;
   } else {
-    iEvent.distance = utils.touchDistance(pointers, deltaSource);
+    iEvent.distance = utils.touchdistance(pointers, deltaSource);
     iEvent.box = utils.touchBBox(pointers);
-    iEvent.scale = iEvent.distance / interaction.gesture.startDistance;
+    iEvent.scale = iEvent.distance / interaction.gesture.startdistance;
     iEvent.angle = utils.touchAngle(pointers, interaction.gesture.prevAngle, deltaSource);
 
     iEvent.ds = iEvent.scale - interaction.gesture.prevScale;
@@ -2262,11 +2262,11 @@ Interaction.signals.on('new', function (interaction) {
   interaction.gesture = {
     start: { x: 0, y: 0 },
 
-    startDistance: 0, // distance between two touches of touchStart
-    prevDistance: 0,
+    startdistance: 0, // distance between two touches of touchStart
+    prevdistance: 0,
     distance: 0,
 
-    scale: 1, // gesture.distance / gesture.startDistance
+    scale: 1, // gesture.distance / gesture.startdistance
 
     startAngle: 0, // angle of line joining two touches
     prevAngle: 0 };
@@ -4000,7 +4000,7 @@ interact.debug = function () {
 // expose the functions used to calculate multi-touch properties
 interact.getPointerAverage = utils.pointerAverage;
 interact.getTouchBBox = utils.touchBBox;
-interact.getTouchDistance = utils.touchDistance;
+interact.getTouchdistance = utils.touchdistance;
 interact.getTouchAngle = utils.touchAngle;
 
 interact.getElementRect = utils.getElementRect;
@@ -6769,7 +6769,7 @@ var pointerUtils = {
     };
   },
 
-  touchDistance: function (event, deltaSource) {
+  touchdistance: function (event, deltaSource) {
     var sourceX = deltaSource + 'X';
     var sourceY = deltaSource + 'Y';
     var touches = pointerUtils.getTouchPair(event);

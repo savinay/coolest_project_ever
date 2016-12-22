@@ -1,4 +1,9 @@
-/*global $*/
+/*------------------------------------------------------------
+	Add DOM Elements and Display Code to the Page
+	-- pos, posCode
+	-- addTextArea, addVideo, addDropDown, addButton, addImage
+	-- addSearch Bar, addNavBar, addDummy, addCode
+------------------------------------------------------------*/
 
 
 function pos(left, top, w, h){
@@ -27,7 +32,7 @@ var addTextArea = function(w, h, left, top){
 var addVideo = function(w, h, left, top){
 	var elements=$(".elem_container");
 	var id = " id=vid_placeholder ";
- 	elements.append("<img src=http://cliparts.co/cliparts/qTB/oq9/qTBoq959c.png "
+ 	elements.append("<img src=downloads/vidDefault.png"
 					+ id 
 					+ pos(left, top, w, h) + "></img>");
 }
@@ -45,7 +50,7 @@ var addDropdown = function(w, h, left, top){
 
 var addButton = function(w, h, left, top){
 	var elements=$(".elem_container");
-	var defaultImg = "http://www.clipartkid.com/images/536/blue-3d-rectangle-9TskkS-clipart.png";
+	var defaultImg = "downloads/buttonDefault.png";
 	var id = " id=button_placeholder ";
 	elements.append("<img src="
 					+ defaultImg
@@ -56,7 +61,7 @@ var addButton = function(w, h, left, top){
 var addImage = function(w, h, left, top){
 	var elements=$(".elem_container");
 	var id = " id=drawnObject ";
-	var defaultImg = "https://getuikit.com/docs/images/placeholder_600x400.svg";
+	var defaultImg = "downloads/imgDefault.svg";
 	var string = "<img id='picture' src= "
 					+ defaultImg
 					+ id
@@ -111,8 +116,12 @@ var addNavbar = function (w, h, left, top) {
 	addCode(top, code);
 }
 
+var addDummy = function (w, h, left, top) {
+	// do nothing.. used when complexIdentifier identifies a squigly
+}
+
 // used for inserting the showing the code on the screen
 var addCode = function (top,code) {
 	var elements = $(".code_container");
-	elements.html("<pre" + posCode(top) + "><code>" + code + "</code></pre>")
+	elements.html("<pre" + posCode(top) + " id='code'><code>" + code + "</code></pre>")
 }

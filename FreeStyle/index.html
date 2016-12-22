@@ -1,85 +1,90 @@
 <html>
 <head>
 	<title>PaperJS - Starter Canvas</title>
-	<!-- Latest compiled and minified CSS -->
+	<!-- Bootstrap! -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<!--For using jquery!-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-	<script src="js/require.js"></script>
-	<!-- Load srlib following RequireJS -->
-	<script src="js/srlib.js"></script>	
-	<!--Paper JS-->
-	<script src="js/paper-full.js"></script>
-	<!--cool font-->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-	<!--Fonts and styling -- needed?-->
-	<link href="css/style.css" rel='stylesheet' type='text/css'/>
-	<!--this is the styling for the elements added to the screen-->
-	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	
-	<script type="text/javascript" src="clickAction.js"></script>
-	<script type="text/javascript" src="addElems.js"></script>
-	<script type="text/javascript" src="geometry.js"></script>
-	<script type="text/javascript" src="controls.js"></script>
-	<script type="text/javascript" src="recognizer.js"></script>
-	<script type="text/javascript" src="complexIdentifier.js"></script>
-	<!--Apperently this is needed for highlighting the code-->
-	<!--<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/go.min.js"></script>-->
-	<!--<script>hljs.initHighlightingOnLoad();</script>-->
-
+	<!-- Bootstrap Offline! -->
+   <link href="downloads/bootstrap.min.css" rel="stylesheet">
+	<!--jQuery!-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<!--jQuery Offline!-->
+	<script src="downloads/jquery.js"></script>
+	<!-- SRLib -->
+	<script src="js/require.js"></script>
+	<script src="js/srlib.js"></script>	
+	<!-- Paper JS -->
+	<script src="js/paper-full.js"></script>
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+	<!-- CSS For Elements (need to download with html?) -->
+	<link href="css/style.css" rel='stylesheet' type='text/css'>
+	<!--~~~~~ FreeStyle Javascript ~~~~~-->
+	<!-- Ties jQuery to the newly added DOM Elements  -->
+	<script type="text/javascript" src="fs/addFunctionality.js"></script>
+	<!-- Add DOM Elements and Display Code to the Page -->
+	<script type="text/javascript" src="fs/addElems.js"></script>
+	<!-- Geometric Objects and Functions for Recognizing and Using Elements -->
+	<script type="text/javascript" src="fs/geometry.js"></script>
+	<!-- Edit the DOM Elements Once Placed -->
+	<script type="text/javascript" src="fs/editor.js"></script>
+	<!-- Identify Simple Shapes (rectangle, circle, squigly, triangle, line) -->
+	<script type="text/javascript" src="fs/shapeRecognizer.js"></script>
+	<!-- Recognize Element and Insert HTML For It -->
+	<script type="text/javascript" src="fs/complexIdentifier.js"></script>
+	<!--check out "highlight.js" for highlighting code-->
 </head>
 
 
 <body style="overflow-y: auto;">
 	<button type="button" id="recognitionOnButton" class="btn btn-primary">Turn Recognizer OFF</button>
 	<button type="button" id="recognizeFigure" class="btn btn-primary">Recognize</button>
-	<button type="button" id="reset" class="btn btn-primary">Reset</button>
+	<button type="button" id="clear" class="btn btn-primary">Clear</button>
 	<button type="button" id="download" class="btn btn-primary">Download</button>
 	
-	
-	<!--The html code for all identified elements here-->
+	<!--The html code for all identified elements goes here-->
 	<div class="elem_container"></div>
-	<!--The text representation of the html code is shown on the side of the screen 
-	and stored here..... could just use the code above if could write a function to convert it-->
+	<!--The text representation of the html code in elem_container stored here-->
+	<!--[could just use the code above if could write a function to convert it]-->
 	<div class="code_container" style="width: 500px; float: right;"></div>
-	
-	<!--for recognizer learning algorithm.. not being used but must exist for now-->
-	<div style="border-style: outset; position:absolute; left: 10; top: 50; background-color: lightgreen; visibility:hidden " >
-		<h3>[CVA, CVP, ERA, ERP]</h3>
-		<ul id="elementlist">
-			<li id="rectangle">Rectangle...[<span>0 0 0 0</span>]</li>
-			<li id="circle">Circle.........[<span>0 0 0 0</span>]</li>
-			<li id="triangle">Triangle.....[<span>0 0 0 0</span>]</li>
-			<li id="line">Line...........[<span>0 0 0 0</span>]</li>
-		</ul>
-		<center style="font-family: 'Montserrat', sans-serif;">I think its a
-						<span id="prediction">...nothing yet.</span></center>
-	</div>
+	<canvas id="canvas" rezise="true"></canvas>
 </body>
+</html>
 
 
 
-<script type="text/paperscript" canvas="canvas">
-// GLOBAL for jquery to know where to insert the elements
+<script type="text/paperscript" canvas="canvas" >
+/*............ GLOBALS ............*/
+// GLOBAL for jQuery to know where to insert the elements
+// used in clickAction and addElems
 var elements=$(".elem_container");
 // GLOBAL that keeps track of the state of the recognizerButton
+// manipulated in this file only 
 var recognizerOn = true;
 // GLOBAL keeps track of current number of buttonDownPresses
+// manipulated in this file only by mouse events
 var countMouseDown = 0;
 // GLOBAL keeps track of time between clicks
+// manipulated in this file only by mouse events
 var clicktimer;
 // GLOBAL to keep hold strokes points for recognizer
+// manipulated by mouse events and reset_globals()
 var combined_stroke = {};
 combined_stroke["outer_shape"] = [];
 combined_stroke["inner_shape"] = []; 
 
 
-/*............ code to use keyboard shortcuts ............*/
+/*------------------------------------------------------------
+	Provides Controls Through Button Presses and KeyPresses
+	- 4 Buttons: ToggleRecognizer, download, clear, Recognize
+	- Keyboard shortcuts: r-reset, c-clear, t-toggle
+								 backspace - remove last DOM element
+------------------------------------------------------------*/
+
+/*............ Keyboard shortcuts ............*/
 $(document).on("keypress", function (e) {
 	if (e.which == 114){ // 'r' pressed
-		insertElement(combined_stroke);
-		resetGlobals();
+		recogAndRst();
 	}
 	else if (e.which == 99){ // 'c' pressed
 		$(".elem_container").empty();
@@ -88,17 +93,19 @@ $(document).on("keypress", function (e) {
 	else if (e.which == 116) // 't' pressed
 		toggleRecognizer();
 });
-// backspaces can't be caught with keypress
+
+// backspaces can only be caught with mouse up
 $(document).keyup( function(e){
 	if (e.keyCode == 8){ // backspace pressed
-		$(".elem_container > :last").remove();
-		$(".code_container > :last").remove();
+		$(".elem_container > :last").fadeOut();
+		$(".code_container > :last").fadeOut();
 	}
 }); 
 
 
-/*............ js for button presses ............*/
-// for letting the user choose between annotation and elemtent inserstion
+/*............ Functions Triggered by Button Presses ............*/
+
+// lets the user choose between annotation and element inserstion
 function toggleRecognizer() {
 	if (recognizerOn)
 		newstate = "OFF";
@@ -108,6 +115,7 @@ function toggleRecognizer() {
 	recognizerOn = !recognizerOn;
 }
 
+// download the HTML DOM for the created website
 function download(filename, text) {
 	var head = $("head").html();
 	head = "<head>" + head + "</head><body>";
@@ -125,15 +133,12 @@ function download(filename, text) {
 }
 
 
-/*............ jquerry for button presses ............*/
+/*............ jQuery for button presses ............*/
 $("#recognitionOnButton").click(function(){ toggleRecognizer() });
 
-$("#recognizeFigure").click(function() {
-	insertElement(combined_stroke);
-	resetGlobals();
-});
+$("#recognizeFigure").click(function() { recogAndRst(); });
 
-$("#reset").click(function() { $(".elem_container").empty() });
+$("#clear").click(function() { $(".elem_container").empty() });
 
 $("#download").click(function(code) { download("myFreeStyle.html", code) });
 
@@ -141,8 +146,23 @@ $("#download").click(function(code) { download("myFreeStyle.html", code) });
 $(".btn").mouseup(function(){ $(this).blur(); })
 
 
+
+
+/*------------------------------------------------------------
+	Manipulate Globals and Perform Mouse-Related events
+	- recogAndRst(), resetGlobals()
+	- onMouseDown, onMouseDrag, onMouseUp
+------------------------------------------------------------*/
+
+/*......... Recognize and Reset .........*/
+function recogAndRst(){
+	insertElement(combined_stroke);
+	resetGlobals();
+}
+
 /*......... Clean Up After Insertion .........*/
 function resetGlobals(){
+	clearTimeout(clicktimer);
 	countMouseDown = 0;
 	var combined_stroke = {};
 	combined_stroke["outer_shape"] = [];
@@ -151,7 +171,7 @@ function resetGlobals(){
 	path = new Path();
 }	
 
-// ...... PAPER JS CODE FOR ADDING POINTS ON MOUSE DRAGGING .......
+/*......... Mouse Events .........*/
 function onMouseDown(event) {
 	clearTimeout(clicktimer);
 	countMouseDown += 1;
@@ -188,10 +208,4 @@ function onMouseUp(event) {
 		resetGlobals();
 	}
 }
-</script>	
-
-<canvas id="canvas" rezise="true"></canvas>
-
-
-</html>
-
+</script>

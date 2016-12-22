@@ -1,47 +1,28 @@
-// returns object with data about bouding box (different than the convex hull)
-// inlc. extremes, midpoint, width, height, area
-function bounding(stroke){
-	BB = new Object();
-	BB.extremes = getExtremes(stroke); // returns object with max/min x/y
-	BB.midpoint = (BB.extremes.max_x + BB.extremes.min_x)/2;
-	BB.width = BB.extremes.max_x - BB.extremes.min_x;
-	BB.height = BB.extremes.max_y - BB.extremes.min_y;
-	// fatness: 1 is square, < 1 is narrow/fat, > 1 is tall
-	BB.fatness = BB.width / BB.height;
-	BB.area = BB.width * BB.height;
-	return BB;
-}
+/*------------------------------------------------------------
+	Recognize Element and Insert HTML For It
+	-- identifyElement, insertElement
+------------------------------------------------------------*/
 
-// returns an object with data about the shape including...
-// shape (string), startPoint, and bounding box
-// returns null if stroke is empty
-function getShape(stroke){
-	if (!stroke || stroke.length == 0) return;
-	var object = new Object();
-	object.shape = recognize(stroke);
-	if (object.shape == "line"){
-	    object.slope = getSlope(stroke);
-	}
-	object.startx = stroke[0].getX();
-	object.starty = stroke[0].getY();
-	object.BB = bounding(stroke);
-	return object;
-}
 
-// gives how far right the inner object is right of the left side of the outer
-// returns a decimal (0-1 if inside the outer)
-// .5 represents the middle
-function posRight(inner, outer){
-	return ((inner.BB.midpoint - outer.BB.extremes.min_x) / outer.BB.width);
-}
 
+// returns null if no conditions are met
 function identifyElement(inner, outer){
+	
+	console.log("Outer: " + outer.shape)
+	console.log("Inner: " + (inner ? inner.shape : "none"))
 	// if outer shape with no inner shape, then identify as radio button
 	// radio button size is constant (so put 1, 1 for width and height)
 	if ((outer.shape == "rectangle" || outer.shape == "circle") 
 		&& outer.BB.area < 400 && !inner) {
 		return addRadioButton;
 	}
+	
+	if (outer.shape == "squigly"){
+		deleteElem(outer.BB.midpoint);
+		// must not return null so return a function that does nothing
+		return addDummy; 
+	}
+	
 	if (outer.shape == "rectangle"){
 		// if it is a rectangle with no inner shape, it is a text box
 		if (!inner){
@@ -89,15 +70,16 @@ function identifyElement(inner, outer){
 /*............ Element Insertion ............*/
 function insertElement(combined_stroke) {
 	// returns specs that represent data about outer shape
-	var outer = getShape(combined_stroke["outer_shape"]);
+	var outer = ComplexShape(combined_stroke["outer_shape"]);
 	// there needs to at least be an out["r shape... "]if not then exit function
 	if (!outer) return;
 	// need to adjust or else elem will jump when replaced
 	outer.startx -= 5; outer.starty += 25;
 	// returns specs that represent data about inner shape
-	var inner = getShape(combined_stroke["inner_shape"]);
-	// returns a function based whatever element was identified
+	var inner = ComplexShape(combined_stroke["inner_shape"]);
+	// returns a function based whatever element was identified (null if none)
 	var addFunc = identifyElement(inner, outer);
+	// if there was an addFunc, run it, else, report Unknown Element
 	addFunc ? 
 		addFunc(outer.BB.width, outer.BB.height, outer.startx, outer.starty) :
 		console.log("Unknown Element.");

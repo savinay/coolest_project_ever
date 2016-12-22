@@ -1313,7 +1313,7 @@ var Point = Base.extend({
 		return Math.atan2(this.cross(point), this.dot(point)) * 180 / Math.PI;
 	},
 
-	getDistance: function() {
+	getdistance: function() {
 		var point = Point.read(arguments),
 			x = point.x - this.x,
 			y = point.y - this.y,
@@ -1387,7 +1387,7 @@ var Point = Base.extend({
 	isClose: function() {
 		var point = Point.read(arguments),
 			tolerance = Base.read(arguments);
-		return this.getDistance(point) <= tolerance;
+		return this.getdistance(point) <= tolerance;
 	},
 
 	isCollinear: function() {
@@ -2538,8 +2538,8 @@ var Line = Base.extend({
 				point.x, point.y, true, isInfinite);
 	},
 
-	getDistance: function(point) {
-		return Math.abs(Line.getSignedDistance(
+	getdistance: function(point) {
+		return Math.abs(Line.getSigneddistance(
 				this._px, this._py, this._vx, this._vy,
 				point.x, point.y, true));
 	},
@@ -2598,7 +2598,7 @@ var Line = Base.extend({
 			return ccw < 0 ? -1 : ccw > 0 ? 1 : 0;
 		},
 
-		getSignedDistance: function(px, py, vx, vy, x, y, asVector) {
+		getSigneddistance: function(px, py, vx, vy, x, y, asVector) {
 			if (!asVector) {
 				vx -= px;
 				vy -= py;
@@ -5615,8 +5615,8 @@ var Segment = Base.extend({
 			p0 = (prev || this)._point,
 			p1 = this._point,
 			p2 = (next || this)._point,
-			d1 = p0.getDistance(p1),
-			d2 = p1.getDistance(p2);
+			d1 = p0.getdistance(p1),
+			d2 = p1.getdistance(p2);
 		if (!type || type === 'catmull-rom') {
 			var a = factor === undefined ? 0.5 : factor,
 				d1_a = Math.pow(d1, a),
@@ -6233,7 +6233,7 @@ statics: {
 
 		function refine(t) {
 			if (t >= 0 && t <= 1) {
-				var dist = point.getDistance(Curve.getPoint(v, t), true);
+				var dist = point.getdistance(Curve.getPoint(v, t), true);
 				if (dist < minDist) {
 					minDist = dist;
 					minT = t;
@@ -6366,8 +6366,8 @@ statics: {
 				epsilon = 2e-7;
 			if (v.isZero()) {
 				return false;
-			} else if (l.getDistance(h1) < epsilon
-					&& l.getDistance(h2) < epsilon) {
+			} else if (l.getdistance(h1) < epsilon
+					&& l.getdistance(h2) < epsilon) {
 				var div = v.dot(v),
 					p1 = v.dot(h1) / div,
 					p2 = v.dot(h2) / div;
@@ -6462,7 +6462,7 @@ statics: {
 			values = this.getValues(),
 			t = Curve.getNearestTime(values, point),
 			pt = Curve.getPoint(values, t);
-		return new CurveLocation(this, t, pt, null, point.getDistance(pt));
+		return new CurveLocation(this, t, pt, null, point.getdistance(pt));
 	},
 
 	getNearestPoint: function() {
@@ -6705,16 +6705,16 @@ new function() {
 		if (++recursion >= 48 || ++calls > 4096)
 			return calls;
 		var q0x = v2[0], q0y = v2[1], q3x = v2[6], q3y = v2[7],
-			getSignedDistance = Line.getSignedDistance,
-			d1 = getSignedDistance(q0x, q0y, q3x, q3y, v2[2], v2[3]),
-			d2 = getSignedDistance(q0x, q0y, q3x, q3y, v2[4], v2[5]),
+			getSigneddistance = Line.getSigneddistance,
+			d1 = getSigneddistance(q0x, q0y, q3x, q3y, v2[2], v2[3]),
+			d2 = getSigneddistance(q0x, q0y, q3x, q3y, v2[4], v2[5]),
 			factor = d1 * d2 > 0 ? 3 / 4 : 4 / 9,
 			dMin = factor * Math.min(0, d1, d2),
 			dMax = factor * Math.max(0, d1, d2),
-			dp0 = getSignedDistance(q0x, q0y, q3x, q3y, v1[0], v1[1]),
-			dp1 = getSignedDistance(q0x, q0y, q3x, q3y, v1[2], v1[3]),
-			dp2 = getSignedDistance(q0x, q0y, q3x, q3y, v1[4], v1[5]),
-			dp3 = getSignedDistance(q0x, q0y, q3x, q3y, v1[6], v1[7]),
+			dp0 = getSigneddistance(q0x, q0y, q3x, q3y, v1[0], v1[1]),
+			dp1 = getSigneddistance(q0x, q0y, q3x, q3y, v1[2], v1[3]),
+			dp2 = getSigneddistance(q0x, q0y, q3x, q3y, v1[4], v1[5]),
+			dp3 = getSigneddistance(q0x, q0y, q3x, q3y, v1[6], v1[7]),
 			hull = getConvexHull(dp0, dp1, dp2, dp3),
 			top = hull[0],
 			bottom = hull[1],
@@ -7002,13 +7002,13 @@ new function() {
 				l1 = flip ? v2 : v1,
 				l2 = flip ? v1 : v2,
 				line = new Line(l1[0], l1[1], l1[6], l1[7]);
-			if (line.getDistance(new Point(l2[0], l2[1])) < geomEpsilon &&
-				line.getDistance(new Point(l2[6], l2[7])) < geomEpsilon) {
+			if (line.getdistance(new Point(l2[0], l2[1])) < geomEpsilon &&
+				line.getdistance(new Point(l2[6], l2[7])) < geomEpsilon) {
 				if (!straightBoth &&
-					line.getDistance(new Point(l1[2], l1[3])) < geomEpsilon &&
-					line.getDistance(new Point(l1[4], l1[5])) < geomEpsilon &&
-					line.getDistance(new Point(l2[2], l2[3])) < geomEpsilon &&
-					line.getDistance(new Point(l2[4], l2[5])) < geomEpsilon) {
+					line.getdistance(new Point(l1[2], l1[3])) < geomEpsilon &&
+					line.getdistance(new Point(l1[4], l1[5])) < geomEpsilon &&
+					line.getdistance(new Point(l2[2], l2[3])) < geomEpsilon &&
+					line.getdistance(new Point(l2[4], l2[5])) < geomEpsilon) {
 					straight1 = straight2 = straightBoth = true;
 				}
 			} else if (straightBoth) {
@@ -7182,7 +7182,7 @@ var CurveLocation = Base.extend({
 		return this._intersection;
 	},
 
-	getDistance: function() {
+	getdistance: function() {
 		return this._distance;
 	},
 
@@ -8334,30 +8334,30 @@ var Path = PathItem.extend({
 			return false;
 		}
 
-		function getDistance(i, j) {
-			return segments[i]._point.getDistance(segments[j]._point);
+		function getdistance(i, j) {
+			return segments[i]._point.getdistance(segments[j]._point);
 		}
 
 		if (!this.hasHandles() && segments.length === 4
 				&& isCollinear(0, 2) && isCollinear(1, 3) && isOrthogonal(1)) {
 			type = Shape.Rectangle;
-			size = new Size(getDistance(0, 3), getDistance(0, 1));
+			size = new Size(getdistance(0, 3), getdistance(0, 1));
 			topCenter = segments[1]._point.add(segments[2]._point).divide(2);
 		} else if (segments.length === 8 && isArc(0) && isArc(2) && isArc(4)
 				&& isArc(6) && isCollinear(1, 5) && isCollinear(3, 7)) {
 			type = Shape.Rectangle;
-			size = new Size(getDistance(1, 6), getDistance(0, 3));
-			radius = size.subtract(new Size(getDistance(0, 7),
-					getDistance(1, 2))).divide(2);
+			size = new Size(getdistance(1, 6), getdistance(0, 3));
+			radius = size.subtract(new Size(getdistance(0, 7),
+					getdistance(1, 2))).divide(2);
 			topCenter = segments[3]._point.add(segments[4]._point).divide(2);
 		} else if (segments.length === 4
 				&& isArc(0) && isArc(1) && isArc(2) && isArc(3)) {
-			if (Numerical.isZero(getDistance(0, 2) - getDistance(1, 3))) {
+			if (Numerical.isZero(getdistance(0, 2) - getdistance(1, 3))) {
 				type = Shape.Circle;
-				radius = getDistance(0, 2) / 2;
+				radius = getdistance(0, 2) / 2;
 			} else {
 				type = Shape.Ellipse;
-				radius = new Size(getDistance(2, 0) / 2, getDistance(3, 1) / 2);
+				radius = new Size(getdistance(2, 0) / 2, getdistance(3, 1) / 2);
 			}
 			topCenter = segments[1]._point;
 		}
@@ -8487,7 +8487,7 @@ var Path = PathItem.extend({
 			if (!loc && join === 'miter' && numSegments > 1) {
 				for (var i = 0; i < numSegments; i++) {
 					var segment = segments[i];
-					if (point.getDistance(segment._point) <= miterLimit
+					if (point.getdistance(segment._point) <= miterLimit
 							&& checkSegmentStroke(segment)) {
 						loc = segment.getLocation();
 						break;
@@ -9080,7 +9080,7 @@ statics: {
 				).intersect(new Line(point.add(normal2),
 					new Point(-normal2.y, normal2.x), true
 				), true);
-			if (corner && point.getDistance(corner) <= miterLimit) {
+			if (corner && point.getdistance(corner) <= miterLimit) {
 				addPoint(corner);
 				if (!isArea)
 					return;
@@ -10315,7 +10315,7 @@ var PathFitter = Base.extend({
 		if (last - first === 1) {
 			var pt1 = points[first],
 				pt2 = points[last],
-				dist = pt1.getDistance(pt2) / 3;
+				dist = pt1.getdistance(pt2) / 3;
 			this.addCurve(segments, [pt1, pt1.add(tan1.normalize(dist)),
 					pt2.add(tan2.normalize(dist)), pt2]);
 			return;
@@ -10397,7 +10397,7 @@ var PathFitter = Base.extend({
 			}
 		}
 
-		var segLength = pt2.getDistance(pt1),
+		var segLength = pt2.getdistance(pt1),
 			eps = epsilon * segLength,
 			handle1,
 			handle2;
@@ -10463,7 +10463,7 @@ var PathFitter = Base.extend({
 		var u = [0];
 		for (var i = first + 1; i <= last; i++) {
 			u[i - first] = u[i - first - 1]
-					+ this.points[i].getDistance(this.points[i - 1]);
+					+ this.points[i].getdistance(this.points[i - 1]);
 		}
 		for (var i = 1, m = last - first; i <= m; i++) {
 			u[i] /= u[m];
@@ -11040,7 +11040,7 @@ var Color = Base.extend(new function() {
 				destination = components[2],
 				canvasGradient;
 			if (gradient._radial) {
-				var radius = destination.getDistance(origin),
+				var radius = destination.getdistance(origin),
 					highlight = components[3];
 				if (highlight) {
 					var vector = highlight.subtract(origin);
@@ -12771,37 +12771,37 @@ var Tool = PaperScopeItem.extend({
 		this._set(props);
 	},
 
-	getMinDistance: function() {
-		return this._minDistance;
+	getMindistance: function() {
+		return this._mindistance;
 	},
 
-	setMinDistance: function(minDistance) {
-		this._minDistance = minDistance;
-		if (minDistance != null && this._maxDistance != null
-				&& minDistance > this._maxDistance) {
-			this._maxDistance = minDistance;
+	setMindistance: function(mindistance) {
+		this._mindistance = mindistance;
+		if (mindistance != null && this._maxdistance != null
+				&& mindistance > this._maxdistance) {
+			this._maxdistance = mindistance;
 		}
 	},
 
-	getMaxDistance: function() {
-		return this._maxDistance;
+	getMaxdistance: function() {
+		return this._maxdistance;
 	},
 
-	setMaxDistance: function(maxDistance) {
-		this._maxDistance = maxDistance;
-		if (this._minDistance != null && maxDistance != null
-				&& maxDistance < this._minDistance) {
-			this._minDistance = maxDistance;
+	setMaxdistance: function(maxdistance) {
+		this._maxdistance = maxdistance;
+		if (this._mindistance != null && maxdistance != null
+				&& maxdistance < this._mindistance) {
+			this._mindistance = maxdistance;
 		}
 	},
 
-	getFixedDistance: function() {
-		return this._minDistance == this._maxDistance
-			? this._minDistance : null;
+	getFixeddistance: function() {
+		return this._mindistance == this._maxdistance
+			? this._mindistance : null;
 	},
 
-	setFixedDistance: function(distance) {
-		this._minDistance = this._maxDistance = distance;
+	setFixeddistance: function(distance) {
+		this._mindistance = this._maxdistance = distance;
 	},
 
 	_handleMouseEvent: function(type, event, point, mouse) {
@@ -12810,25 +12810,25 @@ var Tool = PaperScopeItem.extend({
 			type = 'mousemove';
 		var move = mouse.move || mouse.drag,
 			responds = this.responds(type),
-			minDistance = this.minDistance,
-			maxDistance = this.maxDistance,
+			mindistance = this.mindistance,
+			maxdistance = this.maxdistance,
 			called = false,
 			tool = this;
-		function update(minDistance, maxDistance) {
+		function update(mindistance, maxdistance) {
 			var pt = point,
 				toolPoint = move ? tool._point : (tool._downPoint || pt);
 			if (move) {
 				if (tool._moveCount && pt.equals(toolPoint)) {
 					return false;
 				}
-				if (toolPoint && (minDistance != null || maxDistance != null)) {
+				if (toolPoint && (mindistance != null || maxdistance != null)) {
 					var vector = pt.subtract(toolPoint),
 						distance = vector.getLength();
-					if (distance < (minDistance || 0))
+					if (distance < (mindistance || 0))
 						return false;
-					if (maxDistance) {
+					if (maxdistance) {
 						pt = toolPoint.add(vector.normalize(
-								Math.min(distance, maxDistance)));
+								Math.min(distance, maxdistance)));
 					}
 				}
 				tool._moveCount++;
@@ -12854,10 +12854,10 @@ var Tool = PaperScopeItem.extend({
 			update();
 			emit();
 		} else if (mouse.up) {
-			update(null, maxDistance);
+			update(null, maxdistance);
 			emit();
 		} else if (responds) {
-			while (update(minDistance, maxDistance))
+			while (update(mindistance, maxdistance))
 				emit();
 		}
 		return called;
@@ -13470,7 +13470,7 @@ new function() {
 				attrs = {
 					cx: origin.x,
 					cy: origin.y,
-					r: origin.getDistance(destination)
+					r: origin.getdistance(destination)
 				};
 				var highlight = color.getHighlight();
 				if (highlight) {

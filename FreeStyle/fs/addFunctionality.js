@@ -1,18 +1,21 @@
-/*global $*/
-/*global elements*/
+/*------------------------------------------------------------
+    Ties jQuery to the newly added DOM Elements 
+    Which Allow the User to Add Functionality to the Elements
+    - add_jquery
+------------------------------------------------------------*/
 
 // have to add jquerry each time a new element is added
 // add_jquerry function is called by the mouse_up
 
-// get current settings for position
+// get current position of placed element
 function get_pos(element){
-	var top  = $(element).css("top");
-	var left = $(element).css("left");
-	var h    = $(element).css("height");
-	var w    = $(element).css("width");
-	var position = ' position:absolute; left:' + left
-		+ '; top:' + top + '; width:' + w + '; height:' + h + '; ';
-	return position;
+    var top  = $(element).css("top");
+    var left = $(element).css("left");
+    var h    = $(element).css("height");
+    var w    = $(element).css("width");
+    var position = ' position:absolute; left:' + left
+        + '; top:' + top + '; width:' + w + '; height:' + h + '; ';
+    return position;
 }
 
 var add_jquery = function(){
